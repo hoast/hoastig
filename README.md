@@ -1,6 +1,6 @@
 <div id="shields" align="center">
   
-  [![](icons/128.png)](https://hoast.github.io/hoastig)
+  [![](icons/128.png)](https://hoast.github.io)
   
   [![npm package @latest](https://img.shields.io/npm/v/hoastig.svg?label=npm@latest&style=flat-square&maxAge=3600)](https://npmjs.com/package/hoastig)
   [![npm package @next](https://img.shields.io/npm/v/hoastig/next.svg?label=npm@next&style=flat-square&maxAge=3600)](https://npmjs.com/package/hoastig/v/next)
@@ -218,16 +218,7 @@ Directory structure:
 └── hoastig.json
 ```
 
-> Don note in this example any files in the `theme` directory also present in the `site` directory are overwritten because of the order specified under sources in the `hoastig.json`.
-
-## Further reading
-
-> Coming soon.
-
-## Implementations
-
-* [`hoast.github.io`](https://github.com/hoast/hoast.github.io/tree/source): Source of the [`hoast`](https://hoast.github.io) website, which is build using `hoastig`.
-* [`hoast.github.io-hoastig`](https://github.com/hoast/hoast.github.io-hoastig/tree/develop): Source of the [`hoastig`](https://hoast.github.io/hoastig) website, which is build using `hoastig`.
+> Do note in this example any files in the `theme` directory also present in the `site` directory are overwritten because of the order specified under sources in the `hoastig.json`.
 
 ## License
 
