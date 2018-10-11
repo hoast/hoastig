@@ -27,42 +27,40 @@ commander
 	.parse(process.argv);
 
 // If version or help called do process.
-if (commander.version === true || commander.help === true) {
-	return;
-}
+if (commander.version !== true && commander.help !== true) {
+	console.log(`Start building...`);
+	let time = process.hrtime();
 
-console.log(`Start building...`);
-let time = process.hrtime();
-
-// Translate arguments.
-const directory = process.cwd();
-const filePath = resolve(directory, commander.config);
-debug(`Process from ${directory} using configuration from ${filePath}.`);
-// Check file access.
-access(filePath, constants.F_OK | constants.R_OK, function(error) {
-	if (error) {
-		throw error;
-	}
-	debug(`Configuration accessible.`);
-	
-	// Read configuration file.
-	readFile(filePath, `utf8`, async function(error, data) {
+	// Translate arguments.
+	const directory = process.cwd();
+	const filePath = resolve(directory, commander.config);
+	debug(`Process from ${directory} using configuration from ${filePath}.`);
+	// Check file access.
+	access(filePath, constants.F_OK | constants.R_OK, function(error) {
 		if (error) {
 			throw error;
 		}
-		debug(`Configuration read: ${data}`);
+		debug(`Configuration accessible.`);
 		
-		// Process directory using configuration.
-		try {
-			await Hoastig(directory, JSON.parse(data), {
-				development: commander.development,
-				remove: commander.remove
-			});
-		} catch(error) {
-			throw error;
-		}
-		
-		time = process.hrtime(time);
-		console.log(`Finished in ${(time[0] + time[1] / 1e9).toFixed(3)}s.`);
+		// Read configuration file.
+		readFile(filePath, `utf8`, async function(error, data) {
+			if (error) {
+				throw error;
+			}
+			debug(`Configuration read: ${data}`);
+			
+			// Process directory using configuration.
+			try {
+				await Hoastig(directory, JSON.parse(data), {
+					development: commander.development,
+					remove: commander.remove
+				});
+			} catch(error) {
+				throw error;
+			}
+			
+			time = process.hrtime(time);
+			console.log(`Finished in ${(time[0] + time[1] / 1e9).toFixed(3)}s.`);
+		});
 	});
-});
+}

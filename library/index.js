@@ -71,18 +71,24 @@ module.exports = async function(directory, config = {}, options = {}) {
 	
 	// Specify custom CSS minifier for the HTML minifier.
 	config.minify.html.minifyCSS = function(content) {
-		try {
-			return minifyCSS.minify(content).styles;
-		}
-		catch (error) {
+		const result = minifyCSS.minify(content);
+		if (result.errors.length > 0) {
+			result.errors.forEach(function(error) {
+				debug(`minifyCSS error: ${error}`);
+			});
 			return content;
 		}
+		return result.styles;
 	};
 	debug(`Custom CSS minifier initialized for the HTML minifier.`);
 	// Specify custom JS minifier for the HTML minifier.
 	config.minify.html.minifyJS = function(content) {
 		const result = minifyJS(content, config.minify.js);
-		return !result.error ? result.code : content;
+		if (result.error) {
+			debug(`minifyJS error: ${result.error}`);
+			return content;
+		}
+		return result.code;
 	};
 	debug(`Custom JS minifier initialized for the HTML minifier.`);
 	
@@ -240,16 +246,23 @@ module.exports = async function(directory, config = {}, options = {}) {
 					// Get file extension.
 					switch(path.extname(filePath).toLowerCase()) {
 						case `.css`:
-							try {
-								return minifyCSS.minify(content).styles;
-							} catch(error) {
+							result = minifyCSS.minify(content);
+							if (result.errors.length > 0) {
+								result.errors.forEach(function(error) {
+									debug(`minifyCSS error: ${error}`);
+								});
 								return content;
 							}
+							return result.styles;
 						case `.html`:
 							return minifyHTML(content, config.minify.html);
 						case `.js`:
 							result = minifyJS(content, config.minify.js);
-							return !result.error ? result.code : content;
+							if (result.error) {
+								debug(`minifyJS error: ${result.error}`);
+								return content;
+							}
+							return result.code;
 					}
 					return content;
 				},
