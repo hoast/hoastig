@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 (unreleased)
+### Added
+- `hoast-minify` added to process.
+### Removed
+- `hoast-convert` removed as `hoast-minify` takes its function. Therefore `clean-css`, `html-minifier`, and `terser` are now indirectly dependencies via `hoast-minify` as well.
+
 ## 1.0.2 (2018-10-11)
 ### Added
 - Eslint testing added with travis-ci.

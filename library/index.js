@@ -10,19 +10,15 @@ const debug = require(`debug`)(`hoastig`);
 const Hoast = require(`hoast`);
 const read = Hoast.read,
 	changed = require(`hoast-changed`),
-	convert = require(`hoast-convert`),
 	filter = require(`hoast-filter`),
 	frontmatter = require(`hoast-frontmatter`),
 	layout = require(`hoast-layout`),
+	minify = require(`hoast-minify`),
 	rename = require(`hoast-rename`),
 	transform = require(`hoast-transform`);
 
 // Front matter extraction.
 const matter = require(`gray-matter`);
-// Modules for file compression.
-const CleanCSS = require(`clean-css`),
-	minifyHTML = require(`html-minifier`).minify,
-	minifyJS = require(`terser`).minify;
 
 // Custom libraries.
 const merge = require(`./utils/merge`);
@@ -56,41 +52,8 @@ module.exports = async function(directory, config = {}, options = {}) {
 			},
 			js: {}
 		}
-	}, config, {
-		minify: {
-			css: {
-				returnPromise: false
-			}
-		}
-	}); // Overwrite clean-css configuration to make sure the system works.
-	debug(`Config merged with default.`);
-	
-	// Initialize Clean CSS.
-	const minifyCSS = new CleanCSS(config.minify.css);
-	debug(`Clean CSS initialized.`);
-	
-	// Specify custom CSS minifier for the HTML minifier.
-	config.minify.html.minifyCSS = function(content) {
-		const result = minifyCSS.minify(content);
-		if (result.errors.length > 0) {
-			result.errors.forEach(function(error) {
-				debug(`minifyCSS error: ${error}`);
-			});
-			return content;
-		}
-		return result.styles;
-	};
-	debug(`Custom CSS minifier initialized for the HTML minifier.`);
-	// Specify custom JS minifier for the HTML minifier.
-	config.minify.html.minifyJS = function(content) {
-		const result = minifyJS(content, config.minify.js);
-		if (result.error) {
-			debug(`minifyJS error: ${result.error}`);
-			return content;
-		}
-		return result.code;
-	};
-	debug(`Custom JS minifier initialized for the HTML minifier.`);
+	}, config);
+	debug(`Config assigned over default.`);
 	
 	// If in development overwrite 'base_url' in metadata.
 	if (options.development) {
@@ -240,37 +203,10 @@ module.exports = async function(directory, config = {}, options = {}) {
 	if (!options.development) {
 		hoast
 			// Minify the CSS, HTML, and JS files.
-			.use(convert({
-				engine: function(filePath, content) {
-					let result;
-					// Get file extension.
-					switch(path.extname(filePath).toLowerCase()) {
-						case `.css`:
-							result = minifyCSS.minify(content);
-							if (result.errors.length > 0) {
-								result.errors.forEach(function(error) {
-									debug(`minifyCSS error: ${error}`);
-								});
-								return content;
-							}
-							return result.styles;
-						case `.html`:
-							return minifyHTML(content, config.minify.html);
-						case `.js`:
-							result = minifyJS(content, config.minify.js);
-							if (result.error) {
-								debug(`minifyJS error: ${result.error}`);
-								return content;
-							}
-							return result.code;
-					}
-					return content;
-				},
-				patterns: [
-					`*.css`,
-					`*.html`,
-					`*.js`
-				]
+			.use(minify({
+				css: config.minify.css,
+				html: config.minify.html,
+				js: config.minify.js
 			}));
 	}
 	

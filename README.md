@@ -118,9 +118,7 @@ hoastig(__dirname config, options);
     * Type: `Number`
     * Default: `8080`
 
-> `minify.css.returnPromise` is always set to `false` and cannot be overwritten.
-
-> `minify.html.minifyCSS` and `minify.html.minifyJS` are both overwritten with a custom function to use `clean-css` and `terser` respectively the options for these are retrieved from `minify.css` and `minify.js`.
+> The `css` and `js` options will also be given to the `html` minifier to use for CSS and JS content within files given to it.
 
 **Defaults**
 
