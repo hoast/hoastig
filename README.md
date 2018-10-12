@@ -18,7 +18,7 @@ The system builds by layering source directories in order to modularize site con
 
 ## Table of contents
 
-* [Installation & usage](#installation-&-usage)
+* [Installation and usage](#installation-and-usage)
   * [Command line interface](#command-line-interface)
   * [Script](#script)
 * [Configuration](#configuration)
@@ -28,7 +28,7 @@ The system builds by layering source directories in order to modularize site con
   * [Source directory](#source-directory)
 * [License](#license)
 
-## Installation & usage
+## Installation and usage
 
 ### Command line interface
 
