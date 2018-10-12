@@ -1,4 +1,4 @@
-<div id="shields" align="center">
+<div align="center">
   
   [![](icons/128.png)](https://hoast.github.io)
   
@@ -12,7 +12,7 @@
 
 # hoastig
 
-`hoastig` is a static page generator made with [`hoast`](hoast.github.io). It is build to be simple, understandable, and functional out of the box, in order to show the power of `hoast` as well as serve a basis to by changed by others to create a workflow that fits their needs.
+A static page generator made with [`hoast`](hoast.github.io). It is build to be simple, understandable, and functional out of the box, in order to show the power of `hoast` as well as serve a basis to by changed by others to create a workflow that fits their needs.
 
 The system builds by layering source directories in order to modularize site content and site layouts. It supports all the basic which you might expect from a static page generator. First `gray-matter` is used to extract front matter from markdown files. `markdown-it` is used to convert the content. `handlebars` enters the content into specified layouts. Finally all CSS, HTML, and JavaScript are minified using `clean-css`, `html-minifier`, and `terser` respectively.
 
