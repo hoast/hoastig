@@ -1,6 +1,18 @@
 # Changelog
 
-## 1.0.3 (unreleased)
+## 1.1.0 (2018-10-15)
+### Added
+- `rename.prettify` added to config, disabling this will not prettify urls of content files.
+- `rename.underscore` added to config, enabling this will remove the first underscore of content files.
+### Changed
+- `debug` Changed from dependency to devDependency.
+- Renamed `library/get/data.js` to `library/get/files.js`.
+### Removed
+- Assertions removed from `library/get/files.js` and `library/get/functions.js`.
+### Fixed
+- Optimized assigning excerpts to front matter.
+
+## 1.0.3 (2018-10-11)
 ### Added
 - `hoast-minify` added to process.
 ### Removed

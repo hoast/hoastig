@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "node node_modules/hoastig/bin/hoastig",
+    "rebuild": "node node_modules/hoastig/bin/hoastig -r",
+    "devbuild": "node node_modules/hoastig/bin/hoastig -d -r"
+  },
+  "dependencies": {
+    "hoastig": "^1.1.1"
+  }
+}

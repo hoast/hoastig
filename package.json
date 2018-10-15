@@ -4,7 +4,7 @@
     "url": "https://rondekker.nl"
   },
   "name": "hoastig",
-  "version": "1.0.3",
+  "version": "1.1.1",
   "description": "Static page generator using hoast.",
   "license": "ISC",
   "keywords": [
@@ -14,7 +14,7 @@
     "page",
     "generator"
   ],
-  "homepage": "https://github.com/hoast/hoastig#readme",
+  "homepage": "https://hoast.github.io/hoastig",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hoast/hoastig.git"
@@ -39,8 +39,7 @@
     "test": "echo \"Warning: no test specified\""
   },
   "dependencies": {
-    "commander": "^2.18.0",
-    "debug": "^4.1.0",
+    "commander": "^2.19.0",
     "gray-matter": "^4.0.1",
     "hoast": "^1.0.1",
     "hoast-changed": "^1.0.1",
@@ -55,6 +54,7 @@
     "markdown-it-anchor": "^5.0.2"
   },
   "devDependencies": {
+    "debug": "^4.1.0",
     "eslint": "^5.6.1"
   }
 }

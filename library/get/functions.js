@@ -1,9 +1,8 @@
 // Node modules.
-const assert = require(`assert`),
-	path = require(`path`);
+const path = require(`path`);
 
 // If debug available require it.
-const debug = require(`debug`)(`hoastig/get/functions`);
+let debug; try { debug = require(`debug`)(`hoastig/get/functions`); } catch(error) { debug = function() {}; }
 
 // Custom libraries.
 const namePath = require(`../utils/namePath`),
@@ -22,24 +21,29 @@ const EXTENSIONS = [
  * @returns Array of file paths of type string.
  */
 const getFunctions = async function(directory, sourceDirectories, subDirectory) {
-	// Validate arguments.
-	assert(typeof(directory) === `string`, `directory must be of type string.`);
-	assert(Array.isArray(sourceDirectories) && sourceDirectories.length > 0 && typeof(sourceDirectories[0] === `string`), `sourceDirectories must be an array of string.`);
-	if (subDirectory) {
-		assert(typeof(subDirectory) === `string`, `subDirectory must be of type string.`);
+	debug(`Looking for custom functions in directory '${directory}' in source directories '${sourceDirectories}' and in sub directory '${subDirectory}'.`);
+	
+	// Check if source directories, and construct path(s) where functions might be located.
+	const absolutePaths = [];
+	if (!sourceDirectories) {
+		absolutePaths.push(path.join(directory, subDirectory));
+	} else {
+		// Iterate through sources in reverse order.
+		for (let i = sourceDirectories.length - 1; i >= 0; i--) {
+			absolutePaths.push(path.join(directory, sourceDirectories[i], subDirectory));
+		}
 	}
-	debug(`Looking for custom files in directory '${directory}' in source directories '${sourceDirectories}' and in sub directory '${subDirectory}'.`);
 	
 	debug(`Looking for custom functions.`);
 	let functions = {};
-	// Iterate through sources in reverse order.
-	for (let i = sourceDirectories.length - 1; i >= 0; i--) {
-		// Construct path where functions might be located.
-		const absoluteDirectory = path.join(directory, sourceDirectories[i], subDirectory);
-		debug(`Looking for custom functions in: ${absoluteDirectory}.`);
+	// Iterate through absolute paths.
+	const absolutePathsLength = absolutePaths.length;
+	for (let i = 0; i < absolutePathsLength; i++) {
+		const absolutePath = absolutePaths[i];
+		debug(`Looking for custom functions in: ${absolutePath}.`);
 		
 		// Go through directory and return paths relative to the given directory.
-		const filePaths = await walk(absoluteDirectory);
+		const filePaths = await walk(absolutePath);
 		if (!filePaths || filePaths.length <= 0) {
 			debug(`No functions found in directory.`);
 			continue;
@@ -65,12 +69,12 @@ const getFunctions = async function(directory, sourceDirectories, subDirectory) 
 			
 			// Get code from storage.
 			try {
-				functions[fileName] = require(path.join(absoluteDirectory, filePath));
+				functions[fileName] = require(path.join(absolutePath, filePath));
 			} catch(error) {
 				debug(`Function '${filePath}' could not be required and therefore ignored.`);
 			}
 		});
-	}
+	};
 	debug(`Finished searching for custom functions.`);
 	
 	return functions;

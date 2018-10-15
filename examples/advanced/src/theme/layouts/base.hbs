@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-GB">
+	<head>
+		<!-- meta -->
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		{{#with base_url }}
+			<base href="{{ this }}"/>
+		{{/with}}
+		{{#with title}}
+			<title>{{ this }}</title>
+		{{/with}}
+		
+		<!-- Icons -->
+		{{#each icons }}
+			<link rel="icon" href="/{{ href }}" type="{{ type }}" sizes="{{ size }}x{{ size }}"/>
+		{{/each}}
+	</head>
+	<body>
+		<!-- Content -->
+		{{{ content }}}
+	</body>
+</html>

@@ -1,12 +1,11 @@
 // Node modules.
 const fs = require(`fs`),
 	path = require(`path`);
-// TODO: Assert whether options are correct at each step of the process.
 
 // If debug available require it.
-const debug = require(`debug`)(`hoastig`);
+let debug; try { debug = require(`debug`)(`hoastig`); } catch(error) { debug = function() {}; }
 
-// Hoast modules.
+// hoast modules.
 const Hoast = require(`hoast`);
 const read = Hoast.read,
 	changed = require(`hoast-changed`),
@@ -17,12 +16,12 @@ const read = Hoast.read,
 	rename = require(`hoast-rename`),
 	transform = require(`hoast-transform`);
 
-// Front matter extraction.
-const matter = require(`gray-matter`);
+// Front matter extraction library.
+const graymatter = require(`gray-matter`);
 
 // Custom libraries.
 const merge = require(`./utils/merge`);
-const getData = require(`./get/data`),
+const getFiles = require(`./get/files`),
 	getFunctions = require(`./get/functions`);
 
 module.exports = async function(directory, config = {}, options = {}) {
@@ -38,9 +37,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 		
 		destination: `dst`,
 		source: `src`,
-		sources: [
-			``
-		],
+		sources: null,
 		metadata: {},
 		
 		concurrency: Infinity,
@@ -51,6 +48,10 @@ module.exports = async function(directory, config = {}, options = {}) {
 				removeComments: true
 			},
 			js: {}
+		},
+		rename: {
+			prettify: true,
+			underscore: false
 		}
 	}, config);
 	debug(`Config assigned over default.`);
@@ -61,8 +62,8 @@ module.exports = async function(directory, config = {}, options = {}) {
 		debug(`Development flag set, metadata.base_url is set to '${config.metadata.base_url}'.`);
 	}
 	
-	debug(`Start Hoast initialization.`);
-	// Initialize Hoast.
+	debug(`Start hoast initialization.`);
+	// Initialize hoast.
 	const hoast = Hoast(directory, {
 		source: config.source,
 		destination: config.destination,
@@ -79,17 +80,21 @@ module.exports = async function(directory, config = {}, options = {}) {
 	hoast
 		// Filter out everything not within the content and static directories in directories.
 		.use(filter({
-			patterns: config.sources.map(function(source) {
+			// Create patterns for each source directory.
+			patterns: config.sources ? config.sources.map(function(source) {
 				return [ `content`, `static` ].map(function(directory) {
 					return `${source}/${directory}/*`;
 				});
-			}) // Create patterns.
+			})
+				// Flatten array.
 				.reduce(function(previous, current) {
 					return previous.concat(current);
-				}) // Flatten array.
+				})
+				// If no sources given then default.
+				: [ `content/*`, `static/*` ]
 		}));
 	
-	if (config.sources.length > 1) {
+	if (config.sources && config.sources.length > 1) {
 		// Filter out files in the current directory if an equivalent file is in a directory after it.
 		// In other words removing duplicate files later on.
 		config.sources.forEach(function(source, index) {
@@ -135,7 +140,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 		// Get helpers.
 		helpers: await getFunctions(absoluteSource, config.sources, `helpers`),
 		// Get partials.
-		partials: await getData(absoluteSource, config.sources, `partials`, [ `.html`, `.hbs` ])
+		partials: await getFiles(absoluteSource, config.sources, `partials`, [ `.html`, `.hbs` ])
 	};
 	
 	// Continue adding to module stack.
@@ -149,10 +154,12 @@ module.exports = async function(directory, config = {}, options = {}) {
 			engine: function(filePath) {
 				let count = 0;
 				
-				for (let i = 0; i < config.sources.length; i++) {
-					if (filePath.startsWith(config.sources[i])) {
-						count = config.sources[i].split(path.sep).length;
-						break;
+				if (config.sources) {
+					for (let i = 0; i < config.sources.length; i++) {
+						if (filePath.startsWith(config.sources[i])) {
+							count = config.sources[i].split(path.sep).length;
+							break;
+						}
 					}
 				}
 				
@@ -168,18 +175,25 @@ module.exports = async function(directory, config = {}, options = {}) {
 		// Read front matter from content.
 		.use(frontmatter({
 			engine: function(filePath, content) {
-				const result = matter(content, {
+				// Get front matter using library.
+				const result = graymatter(content, {
 					excerpt: true
 				});
 				
+				// If no excerpt then set extracted excerpt.
+				if (!result.data.excerpt && result.excerpt) {
+					result.data.excerpt = result.excerpt;
+				}
+				
+				// Return results.
 				return {
 					content: result.content,
-					frontmatter: Object.assign({ excerpt: result.excerpt }, result.data)
+					frontmatter: result.data
 				};
 			},
 			patterns:`content/*.md`
 		}))
-		// Transform markdown content to HTML.
+		// Transform Markdown content to HTML.
 		.use(transform({
 			options: Object.assign({
 				html: true,
@@ -191,9 +205,9 @@ module.exports = async function(directory, config = {}, options = {}) {
 		}))
 		// Fill content into handlebar templates.
 		.use(layout({
-			directories: config.sources.map(function(source) {
+			directories: config.sources ? config.sources.map(function(source) {
 				return `${source}/layouts`;
-			}),
+			}) : `layouts`,
 			wrappers: `base.hbs`,
 			options: handlebarsOptions,
 			patterns: `content/*.html`
@@ -214,14 +228,23 @@ module.exports = async function(directory, config = {}, options = {}) {
 		// Clean-up file paths.
 		.use(rename({
 			engine: function(filePath) {
-				// Remove type directory. (static/js/nav.js -> js/nav.js)
+				// Spite file path up.
 				let newPath = filePath.split(path.sep);
+				// Remove type directory. (static/js/nav.js -> js/nav.js)
 				newPath.shift();
 				
-				// Beatify HTML file paths. (page.html -> page/index.html)
+				// Apply special rename rules for content files.
 				if (filePath.startsWith(`content`)) {
-					const fileName = newPath[newPath.length - 1];
-					if ([ `index.html` ].indexOf(fileName) < 0) {
+					// Get file name from past.
+					let fileName = newPath[newPath.length - 1];
+					
+					// Remove underscore from file name.
+					if (config.rename.underscore && fileName.startsWith(`_`)) {
+						fileName = newPath[newPath.length - 1] = fileName.substring(1);
+					}
+					
+					// Beatify HTML file paths. (page.html -> page/index.html)
+					if (config.rename.prettify && fileName !== `index.html`) {
 						newPath[newPath.length - 1] = fileName.split(`.`).slice(0, -1).join(`.`);
 						newPath.push(`index.html`);
 					}

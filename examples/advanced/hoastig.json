@@ -1,0 +1,22 @@
+{
+  "sources": [
+    "theme",
+    "site"
+  ],
+  "metadata": {
+    "base_url": "http://localhost:8080",
+    "title": "Advanced example",
+    
+    "icons": [
+      {
+        "href": "icons.png",
+        "size": 16,
+        "type": "image/png"
+      }
+    ]
+  },
+  
+  "rename": {
+    "underscore": true
+  }
+}

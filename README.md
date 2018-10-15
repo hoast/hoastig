@@ -93,7 +93,7 @@ hoastig(__dirname config, options);
   * Default: `src`
 * `sources`: The subdirectories to process files from, whereby the directories later in the list overwrite files in the directories before it.
   * Type: `Array of strings`
-  * Default: `['']`
+  * Default: `null`
 * `metadata`: Metadata given to the layouts.
   * Type: `Object`
   * Default: `{}`
@@ -110,6 +110,13 @@ hoastig(__dirname config, options);
   * `js`: Options for [tenrser](https://github.com/terser-js/terser#minify-options).
     * Type: `Object`
     * Default: `{}`
+* `rename`
+  * `prettify`: Whether to prettify the file paths for the web. For example going from `article.html` to `article/index.html`.
+    * Type: `Boolean`
+    * Default: `true`
+  * `underscore`: Whether to remove the underscore at the start of file names in the content directory.
+    * Type: `Boolean`
+    * Default: `false`
 * `development`
   * `host`: Address to use in a development build.
     * Type: `String`
@@ -126,9 +133,7 @@ hoastig(__dirname config, options);
 {
   "destination": "dst",
   "source": "src",
-  "sources": [
-    ""
-  ],
+  "sources": null,
   "metadata": {},
   
   "concurrency": Infinity,
@@ -139,6 +144,10 @@ hoastig(__dirname config, options);
       "removeComments": true
     },
     "js": {}
+  },
+  "rename": {
+    "prettify": true,
+    "underscore": false
   },
   
   "development": {
@@ -160,7 +169,7 @@ The destination directory is the directory relative to where the command is exec
 
 ### Source directory
 
-The source directory is the directory relative to where the command is executed from and can be defined in the configuration file, by default this is set to `src`. A separate list of sources can be specified which are contained within the source directory. This list can be used to split parts of a site out in for instance a theme and content, by default this list is set to `[ "" ]`. The directories overwrite the previous one in the order they are provided in. The defaults result into taking the `src` directory as the root and only directory to build. Each source directory follows the following pattern of directories.
+The source directory is the directory relative to where the command is executed from and can be defined in the configuration file, by default this is set to `src`. A separate list of sources can be specified which are contained within the source directory. This list can be used to split parts of a site out in for instance a theme and content, by default this list is set to `null`. The directories overwrite the previous one in the order they are provided in. The defaults result into taking the `src` directory as the root and only directory to build. Each source directory follows the following pattern of directories.
 
 * `content`: Content files, each file will be transformed into a page. Files should have the `.hbs`, `.html`, or `.md` extension. Extension are eventually converted to `.html` if they are not already. Extension can also be chained so that a markdown file can include handlebar partials for instance. For example `page.hbs.md` will first be transformed from markdown to html, then it will be read as handlebars and transformed to html again, this time giving it the `.html` extension. Finally the resulting or pre-existing `.html` files will be minified.
 * `decorators`: Handlebar decorators. Files should have the `.js` extension. The file should export a single handlebars decorator compatible function.

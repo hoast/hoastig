@@ -1,10 +1,9 @@
 // Node modules.
-const assert = require(`assert`),
-	fs = require(`fs`),
+const fs = require(`fs`),
 	path = require(`path`);
 
 // If debug available require it.
-const debug = require(`debug`)(`hoastig/get/data`);
+let debug; try { debug = require(`debug`)(`hoastig/get/files`); } catch(error) { debug = function() {}; }
 
 // Custom libraries.
 const namePath = require(`../utils/namePath`),
@@ -18,31 +17,30 @@ const namePath = require(`../utils/namePath`),
  * @param {Array of strings} extensions Array of file extensions formatted as `.html`.
  * @returns Array of file paths of type string.
  */
-const getData = async function(directory, sourceDirectories, subDirectory, extensions) {
-	// Validate arguments.
-	assert(typeof(directory) === `string`, `directory must be of type string.`);
-	assert(Array.isArray(sourceDirectories) && sourceDirectories.length > 0 && typeof(sourceDirectories[0] === `string`), `sourceDirectories must be an array of string.`);
-	if (subDirectory) {
-		assert(typeof(subDirectory) === `string`, `subDirectory must be of type string.`);
-	}
-	if (extensions) {
-		assert(Array.isArray(extensions) && extensions.length > 0 && typeof(extensions[0] === `string`), `extensions must be an array of string.`);
-		// Ensure extensions are lower case.
-		extensions = extensions.map(function(extension) {
-			return extension.toLowerCase();
-		});
-	}
+const getFiles = async function(directory, sourceDirectories, subDirectory, extensions) {
 	debug(`Looking for custom files in directory '${directory}' in source directories '${sourceDirectories}' and in sub directory '${subDirectory}' with extensions '${extensions}'.`);
 	
+	// Check if source directories, and construct path(s) where functions might be located.
+	const absolutePaths = [];
+	if (!sourceDirectories) {
+		absolutePaths.push(path.join(directory, subDirectory));
+	} else {
+		// Iterate through sources in reverse order.
+		for (let i = sourceDirectories.length - 1; i >= 0; i--) {
+			absolutePaths.push(path.join(directory, sourceDirectories[i], subDirectory));
+		}
+	}
+	
+	debug(`Looking for custom files.`);
 	const files = {};
-	// Iterate through sources in reverse order.
-	for (let i = sourceDirectories.length - 1; i >= 0; i--) {
-		// Construct path where files might be located.
-		const absoluteDirectory = path.join(directory, sourceDirectories[i], subDirectory);
-		debug(`Looking for custom files in '${absoluteDirectory}'.`);
+	// Iterate through absolute paths.
+	const absolutePathsLength = absolutePaths.length;
+	for (let i = 0; i < absolutePathsLength; i++) {
+		const absolutePath = absolutePaths[i];
+		debug(`Looking for custom files in '${absolutePath}'.`);
 		
 		// Go through directory and return paths relative to the given directory.
-		const filePaths = await walk(absoluteDirectory);
+		const filePaths = await walk(absolutePath);
 		if (!filePaths || filePaths.length <= 0) {
 			debug(`No files found in directory.`);
 			continue;
@@ -69,7 +67,7 @@ const getData = async function(directory, sourceDirectories, subDirectory, exten
 					}
 					
 					// Get content from storage.
-					fs.readFile(path.join(absoluteDirectory, filePath), `utf8`, function(error, data) {
+					fs.readFile(path.join(absolutePath, filePath), `utf8`, function(error, data) {
 						if (error) {
 							debug(`File '${filePath}' ran into error when reading therefore ignored: ${error}`);
 							return resolve();
@@ -99,4 +97,4 @@ const getData = async function(directory, sourceDirectories, subDirectory, exten
 	return files;
 };
 
-module.exports = getData;
+module.exports = getFiles;
