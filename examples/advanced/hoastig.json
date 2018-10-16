@@ -4,7 +4,8 @@
     "site"
   ],
   "metadata": {
-    "base_url": "http://localhost:8080",
+    "site_url": "http://localhost:8080",
+    
     "title": "Advanced example",
     
     "icons": [

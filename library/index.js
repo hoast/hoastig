@@ -56,10 +56,17 @@ module.exports = async function(directory, config = {}, options = {}) {
 	}, config);
 	debug(`Config assigned over default.`);
 	
-	// If in development overwrite 'base_url' in metadata.
-	if (options.development) {
-		config.metadata.base_url = `http://${config.development.host}:${config.development.port}`;
-		debug(`Development flag set, metadata.base_url is set to '${config.metadata.base_url}'.`);
+	// Overwrite `site_url` if in development mode. 
+	if (config.metadata.site_url && options.development) {
+		// Overwrite `site_url` in metadata.
+		config.metadata.site_url = `${config.development.host}:${config.development.port}`;
+		
+		// Prepend `http://` if not already present.
+		if (!config.metadata.site_url.startsWith(`http://`) && !config.metadata.site_url.startsWith(`https://`)) {
+			config.metadata.site_url = `http://${config.metadata.site_url}`;
+		}
+		
+		debug(`Development flag set, metadata.site_url is set to '${config.metadata.site_url}'.`);
 	}
 	
 	debug(`Start hoast initialization.`);
@@ -149,11 +156,11 @@ module.exports = async function(directory, config = {}, options = {}) {
 		.use(changed())
 		// Read file content.
 		.use(read())
-		// Remove the theme and site directory from the path names.
+		// Remove the source sub directory and apply rename configuration to file paths.
 		.use(rename({
 			engine: function(filePath) {
+				// Get amount of directory layers.
 				let count = 0;
-				
 				if (config.sources) {
 					for (let i = 0; i < config.sources.length; i++) {
 						if (filePath.startsWith(config.sources[i])) {
@@ -163,9 +170,34 @@ module.exports = async function(directory, config = {}, options = {}) {
 					}
 				}
 				
+				// Split file path up in segments.
 				filePath = filePath.split(path.sep);
-				for (let j = 0; j < count; j++) {
-					filePath.shift();
+				if (count > 0) {
+					// Remove source sub directory.
+					filePath = filePath.slice(count - 1);
+				}
+				
+				// Apply special rename rules for 'content' files.
+				if (filePath[0] == `content`) {
+					// Split file name from extensions.
+					let fileName = filePath[filePath.length - 1].split(`.`);
+					// Join extension together and store.
+					const extensions = fileName.slice(1).join(`.`);
+					// Get base file name.
+					fileName = fileName[0];
+					
+					// Remove underscore from file name.
+					if (config.rename.underscore && fileName.startsWith(`_`)) {
+						fileName = fileName.substring(1);
+					}
+					
+					// Beatify HTML file paths. (page.html -> page/index.html)
+					if (config.rename.prettify && fileName !== `index`) {
+						fileName = path.join(fileName, `index`);
+					}
+					
+					// Merge name and extensions back together.
+					filePath[filePath.length - 1] = `${fileName}.${extensions}`;
 				}
 				
 				// Return result.
@@ -174,21 +206,36 @@ module.exports = async function(directory, config = {}, options = {}) {
 		}))
 		// Read front matter from content.
 		.use(frontmatter({
-			engine: function(filePath, content) {
+			engine: function(filePath, fileContent) {
 				// Get front matter using library.
-				const result = graymatter(content, {
+				const { content, data, excerpt } = graymatter(fileContent, {
 					excerpt: true
 				});
 				
 				// If no excerpt then set extracted excerpt.
-				if (!result.data.excerpt && result.excerpt) {
-					result.data.excerpt = result.excerpt;
+				if (!data.excerpt && excerpt) {
+					data.excerpt = excerpt;
 				}
+				
+				// Next sections adds extra info to data.
+				
+				// Split file path up.
+				const fileSegments = filePath.split(path.sep);
+				// Get base file name without extensions.
+				const fileName = fileSegments[fileSegments.length - 1].split(`.`)[0];
+				// Start with site_url if set.
+				data.base_url = config.metadata.site_url ? `${config.metadata.site_url}/` : `/`;
+				// Set page url relative to root directory.
+				if (fileSegments.length > 2) {
+					data.base_url += `${fileSegments.slice(1, fileSegments.length - 1).join(`/`)}/`;
+				}
+				// Add page url to data.
+				data.page_url = `${data.base_url}${fileName}.html`;
 				
 				// Return results.
 				return {
-					content: result.content,
-					frontmatter: result.data
+					content: content,
+					frontmatter: data
 				};
 			},
 			patterns:`content/*.md`
@@ -211,6 +258,19 @@ module.exports = async function(directory, config = {}, options = {}) {
 			wrappers: `base.hbs`,
 			options: handlebarsOptions,
 			patterns: `content/*.html`
+		}))
+		// Remove type directory. 'static/js/nav.js' -> 'js/nav.js'.
+		.use(rename({
+			engine: function(filePath) {
+				// Get index of first path separator.
+				let index = filePath.indexOf(path.sep);
+				// Sub string past the first path separator.
+				return filePath.substring(index + path.sep.length);
+			},
+			patterns: [
+				`content/*`,
+				`static/*`
+			]
 		}));
 	
 	// Only minify if not in development mode.
@@ -222,42 +282,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 				html: config.minify.html,
 				js: config.minify.js
 			}));
-	}
-	
-	hoast
-		// Clean-up file paths.
-		.use(rename({
-			engine: function(filePath) {
-				// Spite file path up.
-				let newPath = filePath.split(path.sep);
-				// Remove type directory. (static/js/nav.js -> js/nav.js)
-				newPath.shift();
-				
-				// Apply special rename rules for content files.
-				if (filePath.startsWith(`content`)) {
-					// Get file name from past.
-					let fileName = newPath[newPath.length - 1];
-					
-					// Remove underscore from file name.
-					if (config.rename.underscore && fileName.startsWith(`_`)) {
-						fileName = newPath[newPath.length - 1] = fileName.substring(1);
-					}
-					
-					// Beatify HTML file paths. (page.html -> page/index.html)
-					if (config.rename.prettify && fileName !== `index.html`) {
-						newPath[newPath.length - 1] = fileName.split(`.`).slice(0, -1).join(`.`);
-						newPath.push(`index.html`);
-					}
-				}
-				
-				// Join path sections back together.
-				return path.join(...newPath);
-			},
-			patterns: [
-				`content/*`,
-				`static/*`
-			]
-		}));
+	}	
 	
 	debug(`Start processing.`);
 	try {

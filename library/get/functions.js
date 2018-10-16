@@ -74,7 +74,7 @@ const getFunctions = async function(directory, sourceDirectories, subDirectory) 
 				debug(`Function '${filePath}' could not be required and therefore ignored.`);
 			}
 		});
-	};
+	}
 	debug(`Finished searching for custom functions.`);
 	
 	return functions;

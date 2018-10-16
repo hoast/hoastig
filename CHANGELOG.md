@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.1.0 (2018-10-15)
+## 1.1.2 (unreleased)
+### Added
+- `base_url` and `page_url` will be added to the front matter of content files.
+
+## 1.1.1 (2018-10-15)
 ### Added
 - `rename.prettify` added to config, disabling this will not prettify urls of content files.
 - `rename.underscore` added to config, enabling this will remove the first underscore of content files.
