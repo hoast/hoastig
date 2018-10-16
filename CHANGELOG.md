@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.2 (unreleased)
+## 1.1.2 (2018-10-16)
 ### Added
 - `base_url` and `page_url` will be added to the front matter of content files.
 

@@ -159,28 +159,33 @@ module.exports = async function(directory, config = {}, options = {}) {
 		// Remove the source sub directory and apply rename configuration to file paths.
 		.use(rename({
 			engine: function(filePath) {
-				// Get amount of directory layers.
-				let count = 0;
+				// Split file path up in segments.
+				let fileSegments = filePath.split(path.sep);
+				
 				if (config.sources) {
+					// Get amount of directory layers.
+					let count = 0;
+					
+					// Iterate through sources.
 					for (let i = 0; i < config.sources.length; i++) {
-						if (filePath.startsWith(config.sources[i])) {
-							count = config.sources[i].split(path.sep).length;
-							break;
+						// If file path starts.
+						if (!filePath.startsWith(config.sources[i])) {
+							continue;
 						}
+						// Write length of segment to count.
+						count = config.sources[i].split(path.sep).length;
+					}
+					
+					if (count > 0) {
+						// Remove source sub directory.
+						fileSegments = fileSegments.slice(count);
 					}
 				}
 				
-				// Split file path up in segments.
-				filePath = filePath.split(path.sep);
-				if (count > 0) {
-					// Remove source sub directory.
-					filePath = filePath.slice(count - 1);
-				}
-				
 				// Apply special rename rules for 'content' files.
-				if (filePath[0] == `content`) {
+				if (fileSegments[0] == `content`) {
 					// Split file name from extensions.
-					let fileName = filePath[filePath.length - 1].split(`.`);
+					let fileName = fileSegments[fileSegments.length - 1].split(`.`);
 					// Join extension together and store.
 					const extensions = fileName.slice(1).join(`.`);
 					// Get base file name.
@@ -197,11 +202,11 @@ module.exports = async function(directory, config = {}, options = {}) {
 					}
 					
 					// Merge name and extensions back together.
-					filePath[filePath.length - 1] = `${fileName}.${extensions}`;
+					fileSegments[fileSegments.length - 1] = `${fileName}.${extensions}`;
 				}
 				
 				// Return result.
-				return path.join(...filePath);
+				return path.join(...fileSegments);
 			}
 		}))
 		// Read front matter from content.
