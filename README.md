@@ -12,9 +12,9 @@
 
 # hoastig
 
-A static page generator made with [`hoast`](hoast.github.io). It is build to be simple, understandable, and functional out of the box, in order to show the power of `hoast` as well as serve a basis to by changed by others to create a workflow that fits their needs.
+A static page generator made with [`hoast`](hoast.github.io/hoast). It is build to be simple, understandable, and functional out of the box in order to serve a basis to be changed by others to create a workflow that fits their needs as well as show the power of hoast.
 
-The system builds by layering source directories in order to modularize site content and site layouts. It supports all the basic which you might expect from a static page generator. First `gray-matter` is used to extract front matter from markdown files. `markdown-it` is used to convert the content. `handlebars` enters the content into specified layouts. Finally all CSS, HTML, and JavaScript are minified using `clean-css`, `html-minifier`, and `terser` respectively.
+The system builds by layering source directories in order to modularize site content and site layouts. It supports all the basic which you might expect from a static page generator. First `gray-matter` is used to extract front matter from markdown files. `markdown-it` is used to convert the content. `handlebars` enters the content into layouts. Finally all CSS, HTML, and JavaScript files are minified using `clean-css`, `html-minifier`, and `terser` respectively.
 
 ## Table of contents
 
@@ -27,9 +27,8 @@ The system builds by layering source directories in order to modularize site con
   * [Destination directory](#destination-directory)
   * [Source directory](#source-directory)
 * [Handlebars context](#handlebars-context)
-* [Troubleshooting](#troubleshooting)
-  * [Incorrect file path](#incorrect-file-path)
-  * [Incorrect page_url](#incorrect-page_url)
+  * [Content](#content)
+  * [URLs](#urls)
 * [License](#license)
 
 ## Installation and usage
@@ -92,18 +91,12 @@ hoastig(__dirname config, options);
 * `destination`: The directory to write the processed files to.
   * Type: `String`
   * Default: `dst`
-* `source`: The directory to process files from.
-  * Type: `String`
-  * Default: `src`
-* `sources`: The subdirectories to process files from, whereby the directories later in the list overwrite files in the directories before it.
-  * Type: `Array of strings`
+* `sources`: The directories to process files from, whereby files in the directories later in the list overwrite files in the directories before it.
+  * Type: `String` or `Array of strings`
   * Default: `null`
 * `metadata`: Metadata given to the layouts.
   * Type: `Object`
   * Default: `{}`
-* `concurrency`: Maximum number of files to process at once.
-  * Type: `Number`
-  * Default: `Infinity`
 * `minify`
   * `css`: Options for [clean-css](https://github.com/jakubpawlowicz/clean-css#constructor-options).
     * Type: `Object`
@@ -121,6 +114,9 @@ hoastig(__dirname config, options);
   * `underscore`: Whether to remove the underscore at the start of file names in the content directory.
     * Type: `Boolean`
     * Default: `false`
+* `concurrency`: Maximum number of files to process at once.
+  * Type: `Number`
+  * Default: `Infinity`
 * `development`
   * `host`: Address to use in a development build.
     * Type: `String`
@@ -136,11 +132,12 @@ hoastig(__dirname config, options);
 ```JSON
 {
   "destination": "dst",
-  "source": "src",
-  "sources": null,
+  "sources": [
+    "src"
+  ],
+  
   "metadata": {},
   
-  "concurrency": Infinity,
   "minify": {
     "css": {},
     "html": {
@@ -154,6 +151,7 @@ hoastig(__dirname config, options);
     "underscore": false
   },
   
+  "concurrency": Infinity,
   "development": {
     "host": "localhost",
     "port": 8080
@@ -173,7 +171,7 @@ The destination directory is the directory relative to where the command is exec
 
 ### Source directory
 
-The source directory is the directory relative to where the command is executed from and can be defined in the configuration file, by default this is set to `src`. A separate list of sources can be specified which are contained within the source directory. This list can be used to split parts of a site out in for instance a theme and content, by default this list is set to `null`. The directories overwrite the previous one in the order they are provided in. The defaults result into taking the `src` directory as the root and only directory to build. Each source directory follows the following pattern of directories.
+A list of sources can be specified which can used to split parts of a site up in, for instance a theme and content directory, by default this list is set to `[ "src" ]`. Each directory in the list will overwrite the previous one in the order they are provided in if duplicate files are found. Each source directory follows the following pattern of optional sub directories.
 
 * `content`: Content files, each file will be transformed into a page. Files should have the `.hbs`, `.html`, or `.md` extension. Extension are eventually converted to `.html` if they are not already. Extension can also be chained so that a markdown file can include handlebar partials for instance. For example `page.hbs.md` will first be transformed from markdown to html, then it will be read as handlebars and transformed to html again, this time giving it the `.html` extension. Finally the resulting or pre-existing `.html` files will be minified.
 * `decorators`: Handlebar decorators. Files should have the `.js` extension. The file should export a single handlebars decorator compatible function.
@@ -182,7 +180,7 @@ The source directory is the directory relative to where the command is executed 
 * `partials`: Handlebar partials. Files should either have the `.hbs` or `.html` extension.
 * `static`: Files in this directory will be transferred over to the root of the destinations directory. `.ccs`, `.html`, and `.js` will be automatically minified.
 
-> Any files put in the root of a source directory or directories not specified in the list above will be ignored by the program. This is useful for storing any `README.md` or other miscellaneous files and directories.
+> Any files put in the root of a source directory or sub directories not specified in the list above will be ignored by the program. This is useful for storing any `README.md` or other miscellaneous files.
 
 #### Default example
 
@@ -205,7 +203,6 @@ hoastig.json:
 ```JSON
 {
   "destination": "destination",
-  "source": "source",
   "sources": [
     "theme",
     "site"
@@ -217,15 +214,14 @@ Directory structure:
 
 ```
 ├── destination/
-├── source/
-│   ├── site/
-│   │   ├── content/
-│   │   └── static/
-│   └── theme/
-│       ├── helpers/
-│       ├── layouts/
-│       ├── partials/
-│       └── static/
+├── site/
+│   ├── content/
+│   └── static/
+└── theme/
+│   ├── helpers/
+│   ├── layouts/
+│   ├── partials/
+│   └── static/
 └── hoastig.json
 ```
 
@@ -246,7 +242,7 @@ The context provided to the Handlebars files exists out of the meta data from th
 
 Markdown files content:
 
-```Markdown
+```
 ---YAML
 title: Lorem ipsum
 ---
@@ -271,7 +267,7 @@ Resulting Handlebars context:
 }
 ```
 
-### Urls
+### URLs
 
 * `site_url`: When the development option is set this will be set to the development host and port set in the configuration. Recommended to be set in the meta data of the configuration file as well.
   * Type: `String`
@@ -319,18 +315,6 @@ For a file at path `content/example.md` with the `development` option set to `tr
   page_url: "http://localhost:8080/example/index.html"
 }
 ```
-
-## Troubleshooting
-
-### Incorrect file path
-
-* If prettify is enabled a content file with a base name of `index` and an unresolved extension will result in a wrong file path. For instance `content/example/index.txt.md` will result in the following file path: `example/index.txt.html`. The intended outcome is: `example/index.txt/index.html`, this is caused by an assumption made during the renaming about how all extensions will be successfully resolved.
-  * Solution: Ensure you do not have unresolved extension.
-
-### Incorrect page_url
-
-* A content file with an unresolved extension will result in the wrong `base_url` and `page_url` values. For instance `content/file.txt.md` will result in the following page_url: `/file/`. The intended outcome is: `/file.txt/`, this caused due to an assumption made during the front matter extraction about how all extensions will be successfully resolved.
-  * Solution: Ensure you do not have unresolved extension.
 
 ## License
 

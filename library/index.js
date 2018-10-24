@@ -20,12 +20,40 @@ const read = Hoast.read,
 const graymatter = require(`gray-matter`);
 
 // Custom libraries.
-const merge = require(`./utils/merge`);
+const merge = require(`./utils/merge`),
+	resolveExtensions = require(`./utils/resolveExtensions`);
 const getFiles = require(`./get/files`),
 	getFunctions = require(`./get/functions`);
 
 module.exports = async function(directory, config = {}, options = {}) {
 	debug(`Start hoastig.`);
+	
+	// Legacy support for `config.source`.
+	if (config.source) {
+		// If `config.sources` not set `config.source` to it.
+		if (!config.sources) {
+			config.sources = config.source;
+		} else {
+			// If both set make sure config.sources is an array.
+			if (typeof(config.sources) === `string`) {
+				config.sources = [
+					config.sources
+				];
+			}
+			
+			// Prepend `config.source` to each `config.sources` value.
+			config.sources = config.sources.map(function(source) {
+				return `${config.source}/${source}`;
+			});
+		}
+	}
+	
+	// If `config.sources` is a string turn it into an array.
+	if (config.sources && typeof(config.sources) === `string`) {
+		config.sources = [
+			config.sources
+		];
+	}
 	
 	debug(`Start merging configuration with default.`);
 	// Override default config with user defined config.
@@ -36,8 +64,9 @@ module.exports = async function(directory, config = {}, options = {}) {
 		},
 		
 		destination: `dst`,
-		source: `src`,
-		sources: null,
+		sources: [
+			`src`
+		],
 		metadata: {},
 		
 		concurrency: Infinity,
@@ -70,36 +99,51 @@ module.exports = async function(directory, config = {}, options = {}) {
 	}
 	
 	debug(`Start hoast initialization.`);
+	
+	// Filter out everything not within the content and static directories.
+	let patterns;
+	if (!config.sources || config.sources.length === 0) {
+		patterns = [
+			`content/*`,
+			`static/*`,
+			`content`,
+			`static`
+		];
+	} else {
+		patterns = [];
+		config.sources.forEach(function(source) {
+			// Add the content and static directory
+			patterns.push(`${source}/content/*`);
+			patterns.push(`${source}/static/*`);
+			patterns.push(`${source}/content`);
+			patterns.push(`${source}/static`);
+			
+			// Add source directory to patterns.
+			patterns.push(source);
+			// Get all directories leading up to the source directory.
+			// This allows us to construct a pattern that matches the directories leading up to the source directory, but not any content within it.
+			const segments = source.split(path.sep);
+			const length = segments.length - 1;
+			if (length > 0) {
+				for (let i = 1; i < length; i++) {
+					// Add directory to patterns.
+					patterns.push(segments.slice(0, i + 1).join(`/`));
+				}
+			}
+		});
+	}
+	
 	// Initialize hoast.
 	const hoast = Hoast(directory, {
-		source: config.source,
+		source: ``,
 		destination: config.destination,
 		
 		remove: options.remove,
+		patterns: patterns,
 		concurrency: config.concurrency,
 		
 		metadata: config.metadata
 	});
-	// Create absolute path to source directory.
-	const absoluteSource = path.join(hoast.directory, hoast.options.source);
-	
-	// Start adding to module stack.
-	hoast
-		// Filter out everything not within the content and static directories in directories.
-		.use(filter({
-			// Create patterns for each source directory.
-			patterns: config.sources ? config.sources.map(function(source) {
-				return [ `content`, `static` ].map(function(directory) {
-					return `${source}/${directory}/*`;
-				});
-			})
-				// Flatten array.
-				.reduce(function(previous, current) {
-					return previous.concat(current);
-				})
-				// If no sources given then default.
-				: [ `content/*`, `static/*` ]
-		}));
 	
 	if (config.sources && config.sources.length > 1) {
 		// Filter out files in the current directory if an equivalent file is in a directory after it.
@@ -110,7 +154,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 				return;
 			}
 			
-			// Add filter duplicate filter checking any sub-sequent sources.
+			// Add filter duplicate filter checking any subsequent sources.
 			hoast.use(filter({
 				engine: async function(file) {
 					// For each directory listed below the current directory.
@@ -143,11 +187,11 @@ module.exports = async function(directory, config = {}, options = {}) {
 	// Get handlebars options.
 	const handlebarsOptions = {
 		// Get decorators.
-		decorators: await getFunctions(absoluteSource, config.sources, `decorators`),
+		decorators: await getFunctions(hoast.directory, config.sources, `decorators`),
 		// Get helpers.
-		helpers: await getFunctions(absoluteSource, config.sources, `helpers`),
+		helpers: await getFunctions(hoast.directory, config.sources, `helpers`),
 		// Get partials.
-		partials: await getFiles(absoluteSource, config.sources, `partials`, [ `.html`, `.hbs` ])
+		partials: await getFiles(hoast.directory, config.sources, `partials`, [ `.html`, `.hbs`, `handlebars` ])
 	};
 	
 	// Continue adding to module stack.
@@ -177,32 +221,31 @@ module.exports = async function(directory, config = {}, options = {}) {
 					}
 					
 					if (count > 0) {
-						// Remove source sub directory.
+						// Remove source directory.
 						fileSegments = fileSegments.slice(count);
 					}
 				}
 				
-				// Apply special rename rules for 'content' files.
-				if (fileSegments[0] == `content`) {
-					// Split file name from extensions.
-					let fileName = fileSegments[fileSegments.length - 1].split(`.`);
-					// Join extension together and store.
-					const extensions = fileName.slice(1).join(`.`);
-					// Get base file name.
-					fileName = fileName[0];
+				// Apply special rename rules for `content` files.
+				if (fileSegments[0] === `content`) {
+					// Get file name with resolved extensions.
+					let fileName = fileSegments[fileSegments.length - 1];
 					
 					// Remove underscore from file name.
 					if (config.rename.underscore && fileName.startsWith(`_`)) {
 						fileName = fileName.substring(1);
 					}
 					
-					// Beatify HTML file paths. (page.html -> page/index.html)
-					if (config.rename.prettify && fileName !== `index`) {
-						fileName = path.join(fileName, `index`);
+					// Beatify HTML file paths if base name will resolve to `index`. Result: `page.html` -> `page/index.html`.
+					if (config.rename.prettify && resolveExtensions([ `hbs`, `handlebars`, `md`, `markdown`, `markdown-it` ], fileName) !== `index`) {
+						// Split extension in file path.
+						const extensions = fileName.split(`.`);
+						// Create new file path with `index` inserted in between the file base name and the extensions.
+						fileName = path.join(extensions[0], [ `index` ].concat(extensions.slice(1)).join(`.`));
 					}
 					
-					// Merge name and extensions back together.
-					fileSegments[fileSegments.length - 1] = `${fileName}.${extensions}`;
+					// Write name back to segments array.
+					fileSegments[fileSegments.length - 1] = fileName;
 				}
 				
 				// Return result.
@@ -226,16 +269,14 @@ module.exports = async function(directory, config = {}, options = {}) {
 				
 				// Split file path up.
 				const fileSegments = filePath.split(path.sep);
-				// Get base file name without extensions.
-				const fileName = fileSegments[fileSegments.length - 1].split(`.`)[0];
 				// Start with site_url if set.
 				data.base_url = config.metadata.site_url ? `${config.metadata.site_url}/` : `/`;
 				// Set page url relative to root directory.
 				if (fileSegments.length > 2) {
 					data.base_url += `${fileSegments.slice(1, fileSegments.length - 1).join(`/`)}/`;
 				}
-				// Add page url to data.
-				data.page_url = `${data.base_url}${fileName}.html`;
+				// Add page url to data, which consists of `base_url` and the file path with all extensions resolved.
+				data.page_url = `${data.base_url}${resolveExtensions([ `hbs`, `handlebars`, `md`, `markdown`, `markdown-it` ], fileSegments[fileSegments.length - 1])}.html`;
 				
 				// Return results.
 				return {
@@ -243,7 +284,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 					frontmatter: data
 				};
 			},
-			patterns:`content/*.md`
+			patterns: `content/*.md`
 		}))
 		// Transform Markdown content to HTML.
 		.use(transform({
@@ -264,7 +305,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 			options: handlebarsOptions,
 			patterns: `content/*.html`
 		}))
-		// Remove type directory. 'static/js/nav.js' -> 'js/nav.js'.
+		// Remove type directory. Result: `static/js/nav.js` -> `js/nav.js`.
 		.use(rename({
 			engine: function(filePath) {
 				// Get index of first path separator.
@@ -291,6 +332,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 	
 	debug(`Start processing.`);
 	try {
+		// Start the hoast process.
 		await hoast.process();
 	} catch(error) {
 		debug(`Error encountered during processing.`);

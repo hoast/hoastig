@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.3 (2018-10-24)
+### Changed
+- updated hoast and the hoast modules.
+### Fixed
+- Prettified file paths, `base_url` front matter values, and `page_url` front matter values fixed by assuming only `.hbs`, `.handlebars`, `.md`, `.markdown`, and `.markdown-it` will be transformed and therefore removed.
+### Removed
+- `config.source` has been deprecated, but legacy support still remains.
+
 ## 1.1.2 (2018-10-16)
 ### Added
 - `base_url` and `page_url` will be added to the front matter of content files.

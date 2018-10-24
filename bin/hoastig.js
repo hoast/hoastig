@@ -47,7 +47,7 @@ if (commander.version !== true && commander.help !== true) {
 			if (error) {
 				throw error;
 			}
-			debug(`Configuration read: ${data}`);
+			debug(`Configuration: ${data}`);
 			
 			// Process directory using configuration.
 			try {

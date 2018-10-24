@@ -5,6 +5,6 @@
     "devbuild": "node node_modules/hoastig/bin/hoastig -d -r"
   },
   "dependencies": {
-    "hoastig": "^1.1.1"
+    "hoastig": "^1.1.3"
   }
 }

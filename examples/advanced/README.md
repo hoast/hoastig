@@ -1,7 +1,5 @@
 # Advanced example
 
-> The example is made for hoastig version 1.1.0.
-
 ## Installation and usage
 
 ```
