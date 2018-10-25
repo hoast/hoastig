@@ -111,7 +111,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 		];
 	} else {
 		patterns = [];
-		config.sources.forEach(function(source) {
+		config.sources = config.sources.map(function(source) {
 			// Add the content and static directory
 			patterns.push(`${source}/content/*`);
 			patterns.push(`${source}/static/*`);
@@ -122,21 +122,27 @@ module.exports = async function(directory, config = {}, options = {}) {
 			patterns.push(source);
 			// Get all directories leading up to the source directory.
 			// This allows us to construct a pattern that matches the directories leading up to the source directory, but not any content within it.
-			const segments = source.split(path.sep);
+			const segments = source.split(`/`);
 			const length = segments.length - 1;
+			let pattern;
 			if (length > 0) {
-				for (let i = 1; i < length; i++) {
+				for (let i = 0; i < length; i++) {
 					// Add directory to patterns.
-					patterns.push(segments.slice(0, i + 1).join(`/`));
+					pattern = segments.slice(0, i + 1).join(`/`);
+					if (!patterns.includes(pattern)) {
+						patterns.push(pattern);
+					}
 				}
 			}
+			
+			return path.join(...segments);
 		});
 	}
 	
 	// Initialize hoast.
 	const hoast = Hoast(directory, {
 		source: ``,
-		destination: config.destination,
+		destination: config.destination.replace(`/`, path.sep),
 		
 		remove: options.remove,
 		patterns: patterns,

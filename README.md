@@ -88,12 +88,12 @@ hoastig(__dirname config, options);
 
 ## Configuration
 
-* `destination`: The directory to write the processed files to.
+* `destination`: The directory to write the processed files to. Forward slashes (`/`) should be used as separators in the paths.
   * Type: `String`
   * Default: `dst`
-* `sources`: The directories to process files from, whereby files in the directories later in the list overwrite files in the directories before it.
+* `sources`: The directories to process files from, whereby files in the directories later in the list overwrite files in the directories before it. Forward slashes (`/`) should be used as separators in the paths.
   * Type: `String` or `Array of strings`
-  * Default: `null`
+  * Default: `[ "src" ]`
 * `metadata`: Metadata given to the layouts.
   * Type: `Object`
   * Default: `{}`

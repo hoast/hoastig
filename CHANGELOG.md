@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4 (2018-10-25)
+### Fixed
+- Fixed using sub-directories in `destination` and `sources` config options.
+
 ## 1.1.3 (2018-10-24)
 ### Changed
 - updated hoast and the hoast modules.
