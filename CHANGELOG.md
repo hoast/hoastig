@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.5 (2018-10-26)
+### Fixed
+- Fixed resolving extensions, whereby the first extensions in the resolve list was not taken into account.
+
 ## 1.1.4 (2018-10-25)
 ### Fixed
 - Fixed using sub-directories in `destination` and `sources` config options.

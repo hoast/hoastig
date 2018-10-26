@@ -8,7 +8,7 @@ const resolveExtensions = function(resolved, fileName) {
 	
 	// Remove any extensions that will be resolved.
 	for (let i = extensions.length - 1; i >= 0; i--) {
-		if (resolved.indexOf(extensions[i]) > 0) {
+		if (resolved.indexOf(extensions[i]) >= 0) {
 			// Remove extension from list.
 			extensions.pop();
 		} else {
