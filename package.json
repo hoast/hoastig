@@ -4,7 +4,7 @@
     "url": "https://rondekker.nl"
   },
   "name": "hoastig",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Static page generator using hoast.",
   "license": "ISC",
   "keywords": [
@@ -45,7 +45,7 @@
     "hoast-changed": "^1.1.1",
     "hoast-filter": "^1.1.1",
     "hoast-frontmatter": "^1.2.1",
-    "hoast-layout": "^1.2.1",
+    "hoast-layout": "^1.2.2",
     "hoast-minify": "^1.1.1",
     "hoast-rename": "^1.1.1",
     "hoast-transform": "^1.1.1",

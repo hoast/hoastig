@@ -118,6 +118,9 @@ hoastig(__dirname config, options);
   * Type: `Number`
   * Default: `Infinity`
 * `development`
+  * `concurrency`: 
+    * Type: `Number`
+    * Default: `null`
   * `host`: Address to use in a development build.
     * Type: `String`
     * Default: `localhost`
@@ -137,7 +140,6 @@ hoastig(__dirname config, options);
   ],
   
   "metadata": {},
-  
   "minify": {
     "css": {},
     "html": {
@@ -152,7 +154,9 @@ hoastig(__dirname config, options);
   },
   
   "concurrency": Infinity,
+  
   "development": {
+    "concurrency": Infinity,
     "host": "localhost",
     "port": 8080
   }
@@ -204,7 +208,7 @@ hoastig.json:
 {
   "destination": "destination",
   "sources": [
-    "theme",
+    "themes/theme",
     "site"
   ]
 }
@@ -217,15 +221,16 @@ Directory structure:
 ├── site/
 │   ├── content/
 │   └── static/
-└── theme/
-│   ├── helpers/
-│   ├── layouts/
-│   ├── partials/
-│   └── static/
+└── themes/
+│   └── theme/
+│       ├── helpers/
+│       ├── layouts/
+│       ├── partials/
+│       └── static/
 └── hoastig.json
 ```
 
-> Do note in this example any files in the `theme` directory also present in the `site` directory are overwritten because of the order specified under sources in the `hoastig.json`.
+> Do note the paths given to `sources` always use forward slashes as separators no matter the platform. Secondly any files in the `themes/theme` directory also present in the `site` directory are overwritten, because of the order specified under sources in the `hoastig.json`.
 
 ## Handlebars context
 

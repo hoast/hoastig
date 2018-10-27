@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.6 (2018-10-27)
+### Changed
+- Updated `hoast-layouts` to version `1.2.2`.
+- `development.concurrency` added to config for overwriting `concurrency` when using the development option.
+
 ## 1.1.5 (2018-10-26)
 ### Fixed
 - Fixed resolving extensions, whereby the first extensions in the resolve list was not taken into account.

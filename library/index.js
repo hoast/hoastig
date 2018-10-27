@@ -58,18 +58,12 @@ module.exports = async function(directory, config = {}, options = {}) {
 	debug(`Start merging configuration with default.`);
 	// Override default config with user defined config.
 	config = merge({
-		development: {
-			host: `localhost`,
-			port: 8080
-		},
-		
 		destination: `dst`,
 		sources: [
 			`src`
 		],
-		metadata: {},
 		
-		concurrency: Infinity,
+		metadata: {},
 		minify: {
 			css: {},
 			html: {
@@ -81,21 +75,39 @@ module.exports = async function(directory, config = {}, options = {}) {
 		rename: {
 			prettify: true,
 			underscore: false
+		},
+		
+		concurrency: Infinity,
+		
+		development: {
+			concurrency: null,
+			host: `localhost`,
+			port: 8080
 		}
 	}, config);
 	debug(`Config assigned over default.`);
 	
-	// Overwrite `site_url` if in development mode. 
-	if (config.metadata.site_url && options.development) {
-		// Overwrite `site_url` in metadata.
-		config.metadata.site_url = `${config.development.host}:${config.development.port}`;
+	// Overwrite `site_url` if in development mode.
+	if (options.development) {
+		debug(`Development option enabled.`);
 		
-		// Prepend `http://` if not already present.
-		if (!config.metadata.site_url.startsWith(`http://`) && !config.metadata.site_url.startsWith(`https://`)) {
-			config.metadata.site_url = `http://${config.metadata.site_url}`;
+		// Overwrite concurrency in config.
+		if (config.development.concurrency) {
+			config.concurrency = config.development.concurrency;
+			debug(`'concurrency' is set to 'development.concurrency' of '${config.concurrency}'.`);
 		}
 		
-		debug(`Development flag set, metadata.site_url is set to '${config.metadata.site_url}'.`);
+		// Overwrite `site_url` in metadata.
+		if (config.metadata.site_url) {
+			config.metadata.site_url = `${config.development.host}:${config.development.port}`;
+			
+			// Prepend `http://` if not already present.
+			if (!config.metadata.site_url.startsWith(`http://`) && !config.metadata.site_url.startsWith(`https://`)) {
+				config.metadata.site_url = `http://${config.metadata.site_url}`;
+			}
+			
+			debug(`'metadata.site_url' is set to 'development.host:development.port' of '${config.metadata.site_url}'.`);
+		}
 	}
 	
 	debug(`Start hoast initialization.`);
