@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.7 (2017-10-27)
+### Changed
+- Updated `hoast-layouts` to version `1.2.3`.
+
 ## 1.1.6 (2018-10-27)
 ### Added
 - `development.concurrency` added to config for overwriting `concurrency` when using the development option.
