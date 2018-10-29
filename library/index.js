@@ -20,12 +20,32 @@ const read = Hoast.read,
 const graymatter = require(`gray-matter`);
 
 // Custom libraries.
-const merge = require(`./utils/merge`),
-	resolveExtensions = require(`./utils/resolveExtensions`);
-const getFiles = require(`./get/files`),
-	getFunctions = require(`./get/functions`);
+const handlebarsLogic = require(`./handlebarsLogic`);
 
-module.exports = async function(directory, config = {}, options = {}) {
+const resolveExtensions = function(resolved, fileName) {
+	// Store extensions.
+	let extensions = fileName.split(`.`);
+	// Get base file name.
+	fileName = extensions[0];
+	// Remove base file name.
+	extensions = extensions.slice(1);
+	
+	// Remove any extensions that will be resolved.
+	for (let i = extensions.length - 1; i >= 0; i--) {
+		if (resolved.indexOf(extensions[i]) >= 0) {
+			// Remove extension from list.
+			extensions.pop();
+		} else {
+			// Stop once the first extension is encountered that will not be transformed away.
+			break;
+		}
+	}
+	
+	// Return file name with left over extensions.
+	return (extensions && extensions.length) ? extensions.unshift(fileName).join(`.`) : fileName;
+};
+
+const hoastig = async function(directory, config = {}, options = {}) {
 	debug(`Start hoastig.`);
 	
 	// Legacy support for `config.source`.
@@ -57,7 +77,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 	
 	debug(`Start merging configuration with default.`);
 	// Override default config with user defined config.
-	config = merge({
+	config = Hoast.helpers.deepAssign({
 		destination: `dst`,
 		sources: [
 			`src`
@@ -114,14 +134,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 	
 	// Filter out everything not within the content and static directories.
 	let patterns;
-	if (!config.sources || config.sources.length === 0) {
-		patterns = [
-			`content/*`,
-			`static/*`,
-			`content`,
-			`static`
-		];
-	} else {
+	if (config.sources && config.sources.length > 0) {
 		patterns = [];
 		config.sources = config.sources.map(function(source) {
 			// Add the content and static directory
@@ -130,8 +143,6 @@ module.exports = async function(directory, config = {}, options = {}) {
 			patterns.push(`${source}/content`);
 			patterns.push(`${source}/static`);
 			
-			// Add source directory to patterns.
-			patterns.push(source);
 			// Get all directories leading up to the source directory.
 			// This allows us to construct a pattern that matches the directories leading up to the source directory, but not any content within it.
 			const segments = source.split(`/`);
@@ -146,9 +157,18 @@ module.exports = async function(directory, config = {}, options = {}) {
 					}
 				}
 			}
+			// Add source directory to patterns.
+			patterns.push(source);
 			
 			return path.join(...segments);
 		});
+	} else {
+		patterns = [
+			`content/*`,
+			`static/*`,
+			`content`,
+			`static`
+		];
 	}
 	
 	// Initialize hoast.
@@ -203,14 +223,12 @@ module.exports = async function(directory, config = {}, options = {}) {
 	}
 	
 	// Get handlebars options.
-	const handlebarsOptions = {
-		// Get decorators.
-		decorators: await getFunctions(hoast.directory, config.sources, `decorators`),
-		// Get helpers.
-		helpers: await getFunctions(hoast.directory, config.sources, `helpers`),
-		// Get partials.
-		partials: await getFiles(hoast.directory, config.sources, `partials`, [ `.html`, `.hbs`, `handlebars` ])
-	};
+	const handlebarsOptions = await handlebarsLogic(
+		(config.sources && config.sources.length > 0) ? config.sources.map(function(source) {
+			return path.join(directory, source);
+		}) : [ directory ],
+		config.concurrency
+	);
 	
 	// Continue adding to module stack.
 	hoast
@@ -224,7 +242,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 				// Split file path up in segments.
 				let fileSegments = filePath.split(path.sep);
 				
-				if (config.sources) {
+				if (config.sources && config.sources.length > 0) {
 					// Get amount of directory layers.
 					let count = 0;
 					
@@ -316,7 +334,7 @@ module.exports = async function(directory, config = {}, options = {}) {
 		}))
 		// Fill content into handlebar templates.
 		.use(layout({
-			directories: config.sources ? config.sources.map(function(source) {
+			directories: (config.sources && config.sources.length > 0) ? config.sources.map(function(source) {
 				return `${source}/layouts`;
 			}) : `layouts`,
 			wrappers: `base.hbs`,
@@ -358,3 +376,5 @@ module.exports = async function(directory, config = {}, options = {}) {
 	}
 	debug(`Processing finished.`);
 };
+
+module.exports = hoastig;

@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 // Node modules.
-const { constants, access, readFile } = require(`fs`),
-	{ resolve } = require(`path`);
+const fs = require(`fs`),
+	path = require(`path`);
 // If debug available require it.
-let debug; try { debug = require(`debug`)(`hoastig-cli`); } catch(error) { debug = function() {}; }
+let debug; try { debug = require(`debug`)(`hoastig/cli`); } catch(error) { debug = function() {}; }
 // Dependency modules.
 const commander = require(`commander`);
 // Custom modules.
 const info = require(`../package.json`),
-	Hoastig = require(`../library`);
+	hoastig = require(`../library`);
 
 // Trace unhandled rejections.
 process.on(`unhandledRejection`, function(reason, promise) {
@@ -33,17 +33,17 @@ if (commander.version !== true && commander.help !== true) {
 
 	// Translate arguments.
 	const directory = process.cwd();
-	const filePath = resolve(directory, commander.config);
+	const filePath = path.resolve(directory, commander.config);
 	debug(`Process from ${directory} using configuration from ${filePath}.`);
 	// Check file access.
-	access(filePath, constants.F_OK | constants.R_OK, function(error) {
+	fs.access(filePath, fs.constants.F_OK | fs.constants.R_OK, function(error) {
 		if (error) {
 			throw error;
 		}
 		debug(`Configuration accessible.`);
 		
 		// Read configuration file.
-		readFile(filePath, `utf8`, async function(error, data) {
+		fs.readFile(filePath, `utf8`, async function(error, data) {
 			if (error) {
 				throw error;
 			}
@@ -51,7 +51,7 @@ if (commander.version !== true && commander.help !== true) {
 			
 			// Process directory using configuration.
 			try {
-				await Hoastig(directory, JSON.parse(data), {
+				await hoastig(directory, JSON.parse(data), {
 					development: commander.development,
 					remove: commander.remove
 				});

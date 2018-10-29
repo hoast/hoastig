@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.1.7 (2017-10-27)
+## 1.1.8 (2018-10-28)
+### Changed
+- Updated `hoast` and `hoast-layout` to versions `1.1.4` and `1.3.0` respectively.
+- Switched to using `hoast.helpers.deepAssign` instead of custom `merge` utility function.
+- Rewrote retrieval of Handlebars' `decorators`, `helpers`, and `partials` options.
+- Restructured scripts in `library` directory.
+
+## 1.1.7 (2018-10-27)
 ### Changed
 - Updated `hoast-layouts` to version `1.2.3`.
 
