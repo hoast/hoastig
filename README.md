@@ -12,7 +12,7 @@
 
 # hoastig
 
-A static page generator made with [`hoast`](hoast.js.org/hoast). It is build to be simple, understandable, and functional out of the box in order to serve a basis to be changed by others to create a workflow that fits their needs as well as show the power of hoast.
+A static page generator made with [`hoast`](https://hoast.js.org/hoast). It is build to be simple, understandable, and functional out of the box in order to serve a basis to be changed by others to create a workflow that fits their needs as well as show the power of hoast.
 
 The system builds by layering source directories in order to modularize site content and site layouts. It supports all the basic which you might expect from a static page generator. First `gray-matter` is used to extract front matter from markdown files. `markdown-it` is used to convert the content. `handlebars` enters the content into layouts. Finally all CSS, HTML, and JavaScript files are minified using `clean-css`, `html-minifier`, and `terser` respectively.
 
