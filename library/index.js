@@ -100,7 +100,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		concurrency: Infinity,
 		
 		development: {
-			concurrency: null,
+			concurrency: undefined,
 			host: `localhost`,
 			port: 8080
 		}

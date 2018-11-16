@@ -21,11 +21,12 @@ The system builds by layering source directories in order to modularize site con
 * [Installation and usage](#installation-and-usage)
   * [Command line interface](#command-line-interface)
   * [Script](#script)
+  * [Development mode](#development-mode)
 * [Configuration](#configuration)
 * [Structure](#structure)
   * [Configuration file](#configuration-file)
   * [Destination directory](#destination-directory)
-  * [Source directory](#source-directory)
+  * [Source directories](#source-directories)
 * [Handlebars context](#handlebars-context)
   * [Content](#content)
   * [URLs](#urls)
@@ -51,27 +52,27 @@ If you install it locally you can use the `node node_modules/hoastig/bin/hoastig
 -r, --remove         remove destination directory beforehand
 ```
 
-> `-d, --development` disables minification of any files as wel as overwrite the `base_url` value to a specified address and port in the [configuration file](#configuration).
+> See [development mode](#development-mode) for more information about the `-d` and `--development` options.
 
 ### Script
 
 If for any reason you want to use the static page generator as part of node application install it locally using `npm i --save hoastig`. After which you should be able to require it and call the asynchronous `hoastig(directory[, config, options])` function. See the table below for an explanation of each parameter as well as an example.
 
+**Options**
+
 * `directory`: Path to directory to work from, most likely `__dirname`.
   * Type: `String`
   * Required: `yes`
-* `config`: Process configuration, see [configuration](#configuration) for more details.
+* `config`: Configuration, see [configuration](#configuration) for more details.
   * Type: `Object`
   * Required: `no`, see configuration section for default values.
 * `options`: Process options.
-  * Type: `Object`
-  * Required: `{ development: false, remove: false }`.
-* `options.development`: Whether to disable minification of any files as wel as overwrite the `site_url` value to a specified address and port in the [configuration file](#configuration).
-  * Type: `Boolean`
-  * Default: `false`
-* `options.remove`: whether to remove the destination directory before starting to process files.
-  * Type: `Boolean`
-  * Default: `false`
+  * `development`: Process in [development mode](#development-mode).
+    * Type: `Boolean`
+    * Default: `false`
+  * `remove`: Remove the destination directory before processing.
+    * Type: `Boolean`
+    * Default: `false`
 
 **Example**
 
@@ -85,6 +86,14 @@ hoastig(__dirname config, options);
 ```
 
 > The function is asynchronous and can therefore be used in combination with the `await` keyword.
+
+### Development mode
+
+The development mode is activated when the `-d` or `--development` options is set when using the command line interface, or the `options.development` boolean is set to true when using script. The difference between normal build mode and development build mode are listed below.
+
+* If `development.concurrency` is set it will override `concurrency`.
+* If `metadata.base_url` is set it will be overwritten using the `development.address` and `development.port`.
+* Minification of the `.css`, `.html`, and `.js` will be disabled.
 
 ## Configuration
 
@@ -104,7 +113,7 @@ hoastig(__dirname config, options);
   * `html`: Options for [html-minifier](https://github.com/kangax/html-minifier#options-quick-reference).
     * Type: `Object`
     * Default: `{ "collapseWhitespace": true, "removeComments": true }`
-  * `js`: Options for [tenrser](https://github.com/terser-js/terser#minify-options).
+  * `js`: Options for [terser](https://github.com/terser-js/terser#minify-options).
     * Type: `Object`
     * Default: `{}`
 * `rename`
@@ -118,13 +127,13 @@ hoastig(__dirname config, options);
   * Type: `Number`
   * Default: `Infinity`
 * `development`
-  * `concurrency`: 
+  * `concurrency`: Override for `concurrency` during development mode.
     * Type: `Number`
-    * Default: `null`
-  * `host`: Address to use in a development build.
+    * Default: `undefined`
+  * `host`: Address to use during development mode.
     * Type: `String`
     * Default: `localhost`
-  * `port`: Process to use in a development build.
+  * `port`: Process to use during development mode.
     * Type: `Number`
     * Default: `8080`
 
@@ -156,7 +165,7 @@ hoastig(__dirname config, options);
   "concurrency": Infinity,
   
   "development": {
-    "concurrency": Infinity,
+    "concurrency": undefined,
     "host": "localhost",
     "port": 8080
   }
@@ -171,11 +180,11 @@ When using the command line interface the configuration can be specified in a `.
 
 ### Destination directory
 
-The destination directory is the directory relative to where the command is executed from and can be defined in the configuration file, by default this is set to `dst`.
+The destination directory is the directory relative to where the program is executed from and can be defined in the configuration file.
 
-### Source directory
+### Source directories
 
-A list of sources can be specified which can used to split parts of a site up in, for instance a theme and content directory, by default this list is set to `[ "src" ]`. Each directory in the list will overwrite the previous one in the order they are provided in if duplicate files are found. Each source directory follows the following pattern of optional sub directories.
+The source directories are a list of paths relative to the where the program is executed from and can be defined in the configuration file. This list can used to split parts of a site up in, for instance a theme and content directory. Each directory in the list will overwrite the previous one in the order they are provided in if duplicate files are found. Each source directory follows the following pattern of optional sub directories.
 
 * `content`: Content files, each file will be transformed into a page. Files should have the `.hbs`, `.html`, or `.md` extension. Extension are eventually converted to `.html` if they are not already. Extension can also be chained so that a markdown file can include handlebar partials for instance. For example `page.hbs.md` will first be transformed from markdown to html, then it will be read as handlebars and transformed to html again, this time giving it the `.html` extension. Finally the resulting or pre-existing `.html` files will be minified.
 * `decorators`: Handlebar decorators. Files should have the `.js` extension. The file should export a single handlebars decorator compatible function.
