@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Added
+- Checkbox plugin added to markdown transformation.
+- Highlighting added to markdown transformation.
+
 ## 1.1.8 (2018-10-28)
 ### Changed
 - Updated `hoast` and `hoast-layout` to versions `1.1.4` and `1.3.0` respectively.

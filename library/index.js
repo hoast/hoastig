@@ -3,7 +3,7 @@ const fs = require(`fs`),
 	path = require(`path`);
 
 // If debug available require it.
-let debug; try { debug = require(`debug`)(`hoastig`); } catch(error) { debug = function() {}; }
+let debug; try { debug = require(`debug`)(`hoastig`); } catch (error) { debug = function() {}; }
 
 // hoast modules.
 const Hoast = require(`hoast`);
@@ -84,6 +84,8 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		],
 		
 		metadata: {},
+		
+		highlight: false,
 		minify: {
 			css: {},
 			html: {
@@ -222,6 +224,38 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		});
 	}
 	
+	// Get Markdown options.
+	const markdownOptions = {
+		html: true,
+		plugins: [
+			`markdown-it-anchor`,
+			`markdown-it-task-checkbox`
+		]
+	};
+	// If config specifies highlighting add the helper function.
+	if (config.highlight) {
+		// Get necessary libraries.
+		const highlight = require(`highlightjs`),
+			markdown = require(`markdown-it`);
+		
+		// Set optional configuration of highlight library.
+		if (typeof(config.highlight) === `object`) {
+			highlight.configure(config.highlight);
+		}
+		
+		// Create function as Markdown options property.
+		markdownOptions.highlight = function(string, language) {
+			if (language && highlight.getLanguage(language)) {
+				try {
+					return `<pre class="hljs"><code>${highlight.highlight(language, string, true).value}</code></pre>`;
+				} catch (error) {
+					debug(`Highlighting failed for '${language}' language.`);
+				}
+			}
+			return `<pre class="hljs"><code>${markdown.utils.escapeHtml(string)}</code></pre>`;
+		};
+	}
+	
 	// Get handlebars options.
 	const handlebarsOptions = await handlebarsLogic(
 		(config.sources && config.sources.length > 0) ? config.sources.map(function(source) {
@@ -322,14 +356,9 @@ const hoastig = async function(directory, config = {}, options = {}) {
 			},
 			patterns: `content/*.md`
 		}))
-		// Transform Markdown content to HTML.
+		// Transform Markdown content to HTML and Handlebars to HTML.
 		.use(transform({
-			options: Object.assign({
-				html: true,
-				plugins: [
-					`markdown-it-anchor`
-				]
-			}, handlebarsOptions),
+			options: Object.assign(markdownOptions, handlebarsOptions),
 			patterns: `content/*.md`
 		}))
 		// Fill content into handlebar templates.
@@ -370,7 +399,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 	try {
 		// Start the hoast process.
 		await hoast.process();
-	} catch(error) {
+	} catch (error) {
 		debug(`Error encountered during processing.`);
 		throw error;
 	}

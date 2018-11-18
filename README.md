@@ -106,6 +106,9 @@ The development mode is activated when the `-d` or `--development` options is se
 * `metadata`: Metadata given to the layouts.
   * Type: `Object`
   * Default: `{}`
+* `highlight`: When set to true or to an object then highlighting of code blocks will be enabled. If set to an object the object will be given as configuration options to [`highlightjs`](https://highlightjs.readthedocs.io/en/latest/api.html#configure-options).
+  * Type: `Boolean` or `Object`
+  * Default: `false`
 * `minify`
   * `css`: Options for [clean-css](https://github.com/jakubpawlowicz/clean-css#constructor-options).
     * Type: `Object`
@@ -149,6 +152,8 @@ The development mode is activated when the `-d` or `--development` options is se
   ],
   
   "metadata": {},
+  
+  "highlight": false,
   "minify": {
     "css": {},
     "html": {
