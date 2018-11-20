@@ -109,6 +109,49 @@ const hoastig = async function(directory, config = {}, options = {}) {
 	}, config);
 	debug(`Config assigned over default.`);
 	
+	// Merge `metadata.json` files of source directories with `config.metadata`.
+	if (config.sources && config.sources.length > 1) {
+		debug(`Merging 'metadata.json' files in source directories with 'config.metadata'.`);
+		
+		await Promise.all(config.sources.map(function(source) {
+			return new Promise(function(resolve) {
+				// Create `metadata.json` file path.
+				const filePath = path.join(directory, source, `metadata.json`);
+				
+				// Check if file exists at path.
+				fs.access(filePath, fs.constants.F_OK | fs.constants.R_OK, function(error) {
+					if (error) {
+						return resolve(null);
+					}
+					
+					// Read file.
+					fs.readFile(filePath, `utf8`, async function(error, data) {
+						if (error) {
+							return resolve(null);
+						}
+						
+						// Parse JSON.
+						return JSON.parse(data);
+					});
+				});
+			});
+		})).then(function(results) {
+			// Add `config.metadata` last in stack.
+			results.push(config.metadata);
+			
+			// Overwrite `config.metadata` with merger of results.
+			config.metadata = results.reduce(function(previous, current) {
+				// If no metadata found skip.
+				if (!current) {
+					return;
+				}
+				
+				// Deep assign current metadata with previous.
+				return Hoast.helpers.deepAssign(previous, current);
+			}, {});
+		});
+	}
+	
 	// Overwrite `site_url` if in development mode.
 	if (options.development) {
 		debug(`Development option enabled.`);
@@ -131,8 +174,6 @@ const hoastig = async function(directory, config = {}, options = {}) {
 			debug(`'metadata.site_url' is set to 'development.host:development.port' of '${config.metadata.site_url}'.`);
 		}
 	}
-	
-	debug(`Start hoast initialization.`);
 	
 	// Filter out everything not within the content and static directories.
 	let patterns;
@@ -173,6 +214,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		];
 	}
 	
+	debug(`Start hoast initialization.`);
 	// Initialize hoast.
 	const hoast = Hoast(directory, {
 		source: ``,
@@ -236,7 +278,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 	if (config.highlight) {
 		// Get necessary libraries.
 		const highlight = require(`highlightjs`),
-			markdown = require(`markdown-it`);
+			markdown = require(`markdown-it`)();
 		
 		// Set optional configuration of highlight library.
 		if (typeof(config.highlight) === `object`) {

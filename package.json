@@ -4,7 +4,7 @@
     "url": "https://rondekker.nl"
   },
   "name": "hoastig",
-  "version": "1.2.0-beta.0",
+  "version": "1.2.0-beta.1",
   "description": "Static page generator using hoast.",
   "license": "ISC",
   "keywords": [
@@ -36,7 +36,8 @@
   ],
   "scripts": {
     "pretest": "eslint library/**/*.js bin/**/*.js",
-    "test": "echo \"Warning: no test specified\""
+    "test": "echo \"Warning: no test specified\"",
+    "next": "npm publish --tag next"
   },
   "dependencies": {
     "commander": "^2.19.0",

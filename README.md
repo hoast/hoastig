@@ -30,7 +30,6 @@ The system builds by layering source directories in order to modularize site con
 * [Handlebars context](#handlebars-context)
   * [Content](#content)
   * [URLs](#urls)
-* [License](#license)
 
 ## Installation and usage
 
@@ -189,7 +188,7 @@ The destination directory is the directory relative to where the program is exec
 
 ### Source directories
 
-The source directories are a list of paths relative to the where the program is executed from and can be defined in the configuration file. This list can used to split parts of a site up in, for instance a theme and content directory. Each directory in the list will overwrite the previous one in the order they are provided in if duplicate files are found. Each source directory follows the following pattern of optional sub directories.
+The source directories are a list of paths relative to the where the program is executed from and can be defined in the configuration file. This list can used to split parts of a site up in, for instance a theme and content directory. Each directory in the list will overwrite the previous one in the order they are provided in if duplicate files are found. Each source directory follows the following pattern of optional sub directories and files.
 
 * `content`: Content files, each file will be transformed into a page. Files should have the `.hbs`, `.html`, or `.md` extension. Extension are eventually converted to `.html` if they are not already. Extension can also be chained so that a markdown file can include handlebar partials for instance. For example `page.hbs.md` will first be transformed from markdown to html, then it will be read as handlebars and transformed to html again, this time giving it the `.html` extension. Finally the resulting or pre-existing `.html` files will be minified.
 * `decorators`: Handlebar decorators. Files should have the `.js` extension. The file should export a single handlebars decorator compatible function.
@@ -197,6 +196,7 @@ The source directories are a list of paths relative to the where the program is 
 * `layouts`: Handlebar layouts. Files should have the `.hbs` extension.
 * `partials`: Handlebar partials. Files should either have the `.hbs` or `.html` extension.
 * `static`: Files in this directory will be transferred over to the root of the destinations directory. `.ccs`, `.html`, and `.js` will be automatically minified.
+* `metadata.json`: A JSON file containing metadata for the layout context> The `config.json`'s metadata will be deeply assigned over this.
 
 > Any files put in the root of a source directory or sub directories not specified in the list above will be ignored by the program. This is useful for storing any `README.md` or other miscellaneous files.
 
@@ -210,7 +210,8 @@ The source directories are a list of paths relative to the where the program is 
 │   ├── helpers/
 │   ├── layouts/
 │   ├── partials/
-│   └── static/
+│   ├── static/
+│   └── metadata.json
 └── hoastig.json
 ```
 
@@ -240,7 +241,8 @@ Directory structure:
 │       ├── helpers/
 │       ├── layouts/
 │       ├── partials/
-│       └── static/
+│       ├── static/
+│       └── metadata.json
 └── hoastig.json
 ```
 
@@ -334,7 +336,3 @@ For a file at path `content/example.md` with the `development` option set to `tr
   page_url: "http://localhost:8080/example/index.html"
 }
 ```
-
-## License
-
-[ISC license](https://github.com/hoast/hoast/blob/master/LICENSE)

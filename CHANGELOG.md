@@ -2,8 +2,9 @@
 
 ## Unreleased
 ### Added
-- Checkbox plugin added to markdown transformation.
-- Highlighting added to markdown transformation.
+- Checkbox plugin added to Markdown transformation.
+- Highlighting added to Markdown transformation.
+- `metadata.json` files support added.
 
 ## 1.1.8 (2018-10-28)
 ### Changed
