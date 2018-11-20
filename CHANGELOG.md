@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 (2018-11-20)
 ### Added
 - Checkbox plugin added to Markdown transformation.
 - Highlighting added to Markdown transformation.

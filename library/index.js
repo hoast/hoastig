@@ -131,7 +131,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 						}
 						
 						// Parse JSON.
-						return JSON.parse(data);
+						return resolve(JSON.parse(data));
 					});
 				});
 			});
@@ -143,7 +143,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 			config.metadata = results.reduce(function(previous, current) {
 				// If no metadata found skip.
 				if (!current) {
-					return;
+					return previous;
 				}
 				
 				// Deep assign current metadata with previous.
