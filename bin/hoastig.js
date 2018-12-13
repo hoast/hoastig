@@ -30,7 +30,7 @@ commander
 if (commander.version !== true && commander.help !== true) {
 	console.log(`Start building...`);
 	let time = process.hrtime();
-
+	
 	// Translate arguments.
 	const directory = process.cwd();
 	const filePath = path.resolve(directory, commander.config);
