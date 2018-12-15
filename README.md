@@ -30,6 +30,7 @@ The system builds by layering source directories in order to modularize site con
 * [Handlebars context](#handlebars-context)
   * [Content](#content)
   * [URLs](#urls)
+* [Known issues](#known-issues)
 
 ## Installation and usage
 
@@ -336,3 +337,6 @@ For a file at path `content/example.md` with the `development` option set to `tr
   page_url: "http://localhost:8080/example/index.html"
 }
 ```
+## Known issues
+
+* Not compatible with [pnpm](https://pnpm.js.org) a fast and disk space efficient alternative to the npm.
