@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (2018-12-16)
+### Changed
+- Updated `hoast-minify` to version `1.2.0`, now supports `*.mjs` file extension for JavaScript files.
+
 ## 1.2.0 (2018-11-20)
 ### Added
 - Checkbox plugin added to Markdown transformation.
