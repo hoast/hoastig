@@ -23,6 +23,9 @@ commander
 	.version(info.version)
 	.option(`-c, --config <path>`, `path to configuration file`, info.name.concat(`.json`))
 	.option(`-d, --development`, `process files in development mode`)
+	.option(`--no-minify`, `disables minifying HTML, CSS, and JS files`)
+	.option(`--no-transform-css`, `disables transforming CSS using PostCSS`)
+	.option(`--no-transform-js`, `disables transforming JS using Babel`)
 	.option(`-r, --remove`, `remove destination directory beforehand`)
 	.parse(process.argv);
 
@@ -53,6 +56,9 @@ if (commander.version !== true && commander.help !== true) {
 			try {
 				await hoastig(directory, JSON.parse(data), {
 					development: commander.development,
+					noMinify: commander.noMinify,
+					noTransformCSS: commander.noTransformCss,
+					noTransformJS: commander.noTransformJs,
 					remove: commander.remove
 				});
 			} catch(error) {

@@ -14,7 +14,7 @@
 
 A static page generator made with [`hoast`](https://hoast.js.org). It is build to be simple, understandable, and functional out of the box in order to serve a basis to be changed by others to create a workflow that fits their needs as well as show the power of hoast.
 
-The system builds by layering source directories in order to modularize site content and site layouts. It supports all the basic which you might expect from a static page generator. First `gray-matter` is used to extract front matter from markdown files. `markdown-it` is used to convert the content. `handlebars` enters the content into layouts. Finally all CSS, HTML, and JavaScript files are minified using `clean-css`, `html-minifier`, and `terser` respectively.
+The system builds by layering source directories in order to modularize site content and site layouts. It supports all the basic which you might expect from a static page generator. First `gray-matter` is used to extract front matter from markdown files. `markdown-it` is used to convert the Markdown content to HTML. `handlebars` enters the HTML content into layouts. Any CSS, JavaScript, and TypeScript files are processed using `postcss` and `babel`. Finally all CSS, HTML, and JavaScript files are minified using `clean-css`, `html-minifier`, and `terser` respectively.
 
 ## Table of contents
 
@@ -106,9 +106,21 @@ The development mode is activated when the `-d` or `--development` options is se
 * `metadata`: Metadata given to the layouts.
   * Type: `Object`
   * Default: `{}`
-* `highlight`: When set to true or to an object then highlighting of code blocks will be enabled. If set to an object the object will be given as configuration options to [`highlightjs`](https://highlightjs.readthedocs.io/en/latest/api.html#configure-options).
-  * Type: `Boolean` or `Object`
-  * Default: `false`
+* `rename`
+  * `prettify`: Whether to prettify the file paths for the web. For example going from `article.html` to `article/index.html`.
+    * Type: `Boolean`
+    * Default: `true`
+  * `underscore`: Whether to remove the underscore at the start of file names in the content directory.
+    * Type: `Boolean`
+    * Default: `false`
+* `transform`: Advanced options used to modify how the CSS, Markdown, and JavaScript are transformed using PostCSS, Markdown-it, and Babel respectively.
+  * `css`:
+    * `plugins`: The plugins used by [PostCSS]() to process `.css` files.
+  * `js`: The configuration used by [Babel](https://babeljs.io/docs/en/next/options) to process any `.js` and `.ts`. The `code` property is always set to `true`.
+  * `md`: 
+    * `highlight`: Differs from `mardown-it`'s highlight option! When set to true or to an object then highlighting of code blocks will be enabled. If set to an object it will be given as configuration options to [`Highlight.js`](https://highlightjs.readthedocs.io/en/latest/api.html#configure-options).
+      * Type: `Boolean` or `Object`
+      * Default: `false`
 * `minify`
   * `css`: Options for [clean-css](https://github.com/jakubpawlowicz/clean-css#constructor-options).
     * Type: `Object`
@@ -119,13 +131,6 @@ The development mode is activated when the `-d` or `--development` options is se
   * `js`: Options for [terser](https://github.com/terser-js/terser#minify-options).
     * Type: `Object`
     * Default: `{}`
-* `rename`
-  * `prettify`: Whether to prettify the file paths for the web. For example going from `article.html` to `article/index.html`.
-    * Type: `Boolean`
-    * Default: `true`
-  * `underscore`: Whether to remove the underscore at the start of file names in the content directory.
-    * Type: `Boolean`
-    * Default: `false`
 * `concurrency`: Maximum number of files to process at once.
   * Type: `Number`
   * Default: `Infinity`
@@ -153,7 +158,37 @@ The development mode is activated when the `-d` or `--development` options is se
   
   "metadata": {},
   
-  "highlight": false,
+  "rename": {
+    "prettify": true,
+    "underscore": false
+  },
+  "transform": {
+    "css": {
+      "plugins": [
+        [
+          "postcss-preset-env", {
+            "stage": 2
+          }
+        ]
+      ]
+    },
+    "js": {
+      "presets": [
+        "@babel/presets-typescript",
+        [
+          "@babel/preset-env", {
+            "targets": "> 1%, not dead"
+          }
+        ]
+      ]
+    },
+    "md": {
+      "html": true,
+      "plugins": [
+        "markdown-it-anchor"
+      ]
+    }
+  },
   "minify": {
     "css": {},
     "html": {
@@ -161,10 +196,6 @@ The development mode is activated when the `-d` or `--development` options is se
       "removeComments": true
     },
     "js": {}
-  },
-  "rename": {
-    "prettify": true,
-    "underscore": false
   },
   
   "concurrency": Infinity,
@@ -339,4 +370,5 @@ For a file at path `content/example.md` with the `development` option set to `tr
 ```
 ## Known issues
 
+* Inline CSS and JavaScript/TypeScript is not processed by PostCSS and Babel.
 * Not compatible with [pnpm](https://pnpm.js.org) a fast and disk space efficient alternative to the npm.

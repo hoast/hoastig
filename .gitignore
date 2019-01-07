@@ -1,2 +1,4 @@
 # Node
 node_modules/
+# Coverage
+.nyc_output/

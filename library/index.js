@@ -5,21 +5,27 @@ const fs = require(`fs`),
 // If debug available require it.
 let debug; try { debug = require(`debug`)(`hoastig`); } catch (error) { debug = function() {}; }
 
+// Get module info.
+const info = require(`../package.json`);
+
 // hoast modules.
 const Hoast = require(`hoast`);
 const read = Hoast.read,
 	changed = require(`hoast-changed`),
+	convert = require(`hoast-convert`),
 	filter = require(`hoast-filter`),
 	frontmatter = require(`hoast-frontmatter`),
 	layout = require(`hoast-layout`),
 	minify = require(`hoast-minify`),
-	rename = require(`hoast-rename`),
 	transform = require(`hoast-transform`);
 
-// Front matter extraction library.
-const graymatter = require(`gray-matter`);
+// Additional modules.
+const babel = require(`@babel/core`),
+	graymatter = require(`gray-matter`),
+	postcss = require(`postcss`),
+	semver = require(`semver`);
 
-// Custom libraries.
+// Custom modules.
 const handlebarsLogic = require(`./handlebarsLogic`);
 
 const resolveExtensions = function(resolved, fileName) {
@@ -48,23 +54,22 @@ const resolveExtensions = function(resolved, fileName) {
 const hoastig = async function(directory, config = {}, options = {}) {
 	debug(`Start hoastig.`);
 	
-	// Legacy support for `config.source`.
-	if (config.source) {
-		// If `config.sources` not set `config.source` to it.
-		if (!config.sources) {
-			config.sources = config.source;
-		} else {
-			// If both set make sure config.sources is an array.
-			if (typeof(config.sources) === `string`) {
-				config.sources = [
-					config.sources
-				];
-			}
-			
-			// Prepend `config.source` to each `config.sources` value.
-			config.sources = config.sources.map(function(source) {
-				return `${config.source}/${source}`;
-			});
+	// If config has a version listed check wether hoastig version is greater than it.
+	if (config.version) {
+		let errorMessage;
+		if (semver.lt(info.version, config.version)) {
+			// If hoastig version is lower than config specified version.
+			errorMessage = `Build canceled. Minimum hoastig version in the configuration is ${config.version}, however you are running hoastig version ${info.version}. Please upgrade hoastig, or downgrade the version in your configuration.`;
+		} else if (semver.major(info.version) !== semver.major(config.version)) {
+			// Different major version, must be higher since previous if excluded anything lower.
+			errorMessage = `Build canceled. Hoastig version is '${info.version}', this is one or more major versions above the hoastig version in the configuration '${config.version}'. Please upgrade the version in your configuration, or downgrade hoastig.`;
+		}
+		
+		if (errorMessage) {
+			debug(`Error encountered during version comparison.`);
+			throw {
+				message: errorMessage
+			};
 		}
 	}
 	
@@ -85,7 +90,37 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		
 		metadata: {},
 		
-		highlight: false,
+		rename: {
+			prettify: true,
+			underscore: false
+		},
+		transform: {
+			css: {
+				plugins: [
+					[
+						`postcss-preset-env`, {
+							stage: 2
+						}
+					]
+				]
+			},
+			js: {
+				presets: [
+					[
+						`@babel/preset-env`, {
+							targets: `> 1%, not dead`
+						}
+					]
+				],
+				plugins: []
+			},
+			md: {
+				html: true,
+				plugins: [
+					`markdown-it-anchor`
+				]
+			}
+		},
 		minify: {
 			css: {},
 			html: {
@@ -93,10 +128,6 @@ const hoastig = async function(directory, config = {}, options = {}) {
 				removeComments: true
 			},
 			js: {}
-		},
-		rename: {
-			prettify: true,
-			underscore: false
 		},
 		
 		concurrency: Infinity,
@@ -175,6 +206,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		}
 	}
 	
+	debug(`Start constructing directory patterns for hoast.`);
 	// Filter out everything not within the content and static directories.
 	let patterns;
 	if (config.sources && config.sources.length > 0) {
@@ -266,46 +298,6 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		});
 	}
 	
-	// Get Markdown options.
-	const markdownOptions = {
-		html: true,
-		plugins: [
-			`markdown-it-anchor`,
-			`markdown-it-task-checkbox`
-		]
-	};
-	// If config specifies highlighting add the helper function.
-	if (config.highlight) {
-		// Get necessary libraries.
-		const highlight = require(`highlightjs`),
-			markdown = require(`markdown-it`)();
-		
-		// Set optional configuration of highlight library.
-		if (typeof(config.highlight) === `object`) {
-			highlight.configure(config.highlight);
-		}
-		
-		// Create function as Markdown options property.
-		markdownOptions.highlight = function(string, language) {
-			if (language && highlight.getLanguage(language)) {
-				try {
-					return `<pre class="hljs"><code>${highlight.highlight(language, string, true).value}</code></pre>`;
-				} catch (error) {
-					debug(`Highlighting failed for '${language}' language.`);
-				}
-			}
-			return `<pre class="hljs"><code>${markdown.utils.escapeHtml(string)}</code></pre>`;
-		};
-	}
-	
-	// Get handlebars options.
-	const handlebarsOptions = await handlebarsLogic(
-		(config.sources && config.sources.length > 0) ? config.sources.map(function(source) {
-			return path.join(directory, source);
-		}) : [ directory ],
-		config.concurrency
-	);
-	
 	// Continue adding to module stack.
 	hoast
 		// Filter out files that have not been changed since the last build.
@@ -313,10 +305,10 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		// Read file content.
 		.use(read())
 		// Remove the source sub directory and apply rename configuration to file paths.
-		.use(rename({
-			engine: function(filePath) {
+		.use(convert({
+			engine: function(file) {
 				// Split file path up in segments.
-				let fileSegments = filePath.split(path.sep);
+				let fileSegments = file.path.split(path.sep);
 				
 				if (config.sources && config.sources.length > 0) {
 					// Get amount of directory layers.
@@ -325,7 +317,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 					// Iterate through sources.
 					for (let i = 0; i < config.sources.length; i++) {
 						// If file path starts.
-						if (!filePath.startsWith(config.sources[i])) {
+						if (!file.path.startsWith(config.sources[i])) {
 							continue;
 						}
 						// Write length of segment to count.
@@ -361,7 +353,9 @@ const hoastig = async function(directory, config = {}, options = {}) {
 				}
 				
 				// Return result.
-				return path.join(...fileSegments);
+				return {
+					path: path.join(...fileSegments)
+				};
 			}
 		}))
 		// Read front matter from content.
@@ -388,7 +382,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 					data.base_url += `${fileSegments.slice(1, fileSegments.length - 1).join(`/`)}/`;
 				}
 				// Add page url to data, which consists of `base_url` and the file path with all extensions resolved.
-				data.page_url = `${data.base_url}${resolveExtensions([ `hbs`, `handlebars`, `md`, `markdown`, `markdown-it` ], fileSegments[fileSegments.length - 1])}.html`;
+				data.page_url = `${data.base_url}${resolveExtensions([ `hbs`, `md` ], fileSegments[fileSegments.length - 1])}.html`;
 				
 				// Return results.
 				return {
@@ -397,13 +391,51 @@ const hoastig = async function(directory, config = {}, options = {}) {
 				};
 			},
 			patterns: `content/*.md`
-		}))
-		// Transform Markdown content to HTML and Handlebars to HTML.
+		}));
+	
+	debug(`Start loading Markdown options.`);
+	// If config specifies highlighting add the helper function.
+	const markdownOptions = config.transform.md;
+	if (markdownOptions.highlight) {
+		// Get necessary libraries.
+		const highlight = require(`highlightjs`),
+			markdown = require(`markdown-it`)();
+		
+		// Set optional configuration of highlight library.
+		if (typeof(markdownOptions.highlight) === `object`) {
+			highlight.configure(markdownOptions.highlight);
+		}
+		
+		// Create function as Markdown options property.
+		markdownOptions.highlight = function(string, language) {
+			if (language && highlight.getLanguage(language)) {
+				try {
+					return `<pre class="hljs"><code>${highlight.highlight(language, string, true).value}</code></pre>`;
+				} catch (error) {
+					debug(`Highlighting failed for '${language}' language.`);
+				}
+			}
+			return `<pre class="hljs"><code>${markdown.utils.escapeHtml(string)}</code></pre>`;
+		};
+	}
+	
+	// Get handlebars options.
+	debug(`Start loading Handlebars options.`);
+	const handlebarsOptions = await handlebarsLogic(
+		(config.sources && config.sources.length > 0) ? config.sources.map(function(source) {
+			return path.join(directory, source);
+		}) : [ directory ],
+		config.concurrency
+	);
+	
+	debug(`Add Markdown transformer and Handlebars layout.`);
+	hoast
+		// Transform Markdown and Handlebars to HTML using Markdown-it.
 		.use(transform({
 			options: Object.assign(markdownOptions, handlebarsOptions),
 			patterns: `content/*.md`
 		}))
-		// Fill content into handlebar templates.
+		// Fill content into handlebar layouts.
 		.use(layout({
 			directories: (config.sources && config.sources.length > 0) ? config.sources.map(function(source) {
 				return `${source}/layouts`;
@@ -411,14 +443,159 @@ const hoastig = async function(directory, config = {}, options = {}) {
 			wrappers: `base.hbs`,
 			options: handlebarsOptions,
 			patterns: `content/*.html`
-		}))
+		}));
+	
+	// Allow CSS transformation to be disabled.
+	// Check if PostCSS plugins are setup.
+	if (!options.noTransformCSS && config.transform.css.plugins && config.transform.css.plugins.length > 0) {
+		debug(`CSS transformation enabled.`);
+		
+		// Setup PostCSS by dynamically loading each plugin.
+		debug(`Start loading PostCSS options.`);
+		const postcssOptions = [];
+		const pluginsCount = config.transform.css.plugins.length;
+		for (let i = 0; i < pluginsCount; i++) {
+			const plugin = config.transform.css.plugins[i];
+			
+			if (typeof(plugin) === `string`) {
+				try {
+					postcssOptions.push(require(plugin));
+				} catch(error) {
+					console.warn(`Unable to import '${plugin}' a PostCSS plugin.`);
+				}
+			} else {
+				// Assume it is an array, whereby the [0] is the plugin name and [1] the plugin configuration.
+				try {
+					postcssOptions.push(require(plugin[0])(plugin[1]));
+				} catch(error) {
+					console.warn(`Unable to import '${plugin[0]}' a PostCSS plugin.`);
+				}
+			}
+		}
+		postcss(postcssOptions);
+		
+		debug(`Add PostCSS converter.`);
+		hoast
+			// Transform CSS to the preferred version of CSS using PostCSS.
+			.use(convert({
+				engine: function(file) {
+					return {
+						content: {
+							data: postcss.process(file.content.data)
+						}
+					};
+				},
+				patterns: `static/*.css`
+			}));
+	}
+	
+	// Allow JS transformation to be disabled.
+	if (!options.noTransformJS && config.transform.js) {
+		debug(`JS/TS transformation enabled.`);
+		
+		// Create the engine functions for the file converters.
+		const createEngine = function(babelOptions) {
+			return async function(file) {
+				// Transform file content by babel.
+				const results = await babel.transformAsync(file.content.data, babelOptions);
+				
+				// Create data of newly converted file.
+				let converted = {
+					content: {
+						path: file.path.substring(0, file.path.lastIndexOf(`.`)).concat(`.js`),
+						data: results.code
+					}
+				};
+				// If only code is given then return quickly.
+				if (!results.ast && !results.map) {
+					return converted;
+				}
+				
+				// Otherwise make it the first entry to the array.
+				converted = [
+					converted
+				];
+				// If AST available add to converted file array.
+				if (results.ast) {
+					converted.push({
+						path: file.path.substring(0, file.path.lastIndexOf(`.`)).concat(`.ast.js`),
+						content: {
+							data: results.ast
+						}
+					});
+				}
+				// If MAP available add to converted file array.
+				if (results.map) {
+					converted.push({
+						path: file.path.substring(0, file.path.lastIndexOf(`.`)).concat(`.map.js`),
+						content: {
+							data: results.map
+						}
+					});
+				}
+				
+				// Return converted files.
+				return converted;
+			};
+		};
+		
+		debug(`Start loading Babel options.`);
+		// Load babel options.
+		const babelOptionsJavaScript = Object.assign(
+			babel.loadOptions(config.transform.js), {
+				code: true
+			}
+		);
+		// Add TypeScript preset to to start of the preset array.
+		const configTypeScript = config.transform.js;
+		configTypeScript.plugins.unshift(`@babel/preset-typescript`);
+		const babelOptionsTypeScript = Object.assign(
+			babel.loadOptions(configTypeScript), {
+				code: true
+			}
+		);
+		
+		debug(`Add Babel converters.`);
+		hoast
+			// Transform TypeScript and ECMAScript to the preferred version of ECMAScript using Babel.
+			.use(convert({
+				engine: createEngine(babelOptionsJavaScript),
+				patterns: [
+					`static/*.js`
+				]
+			}))
+			// Transform TypeScript and ECMAScript to the preferred version of ECMAScript using Babel.
+			.use(convert({
+				engine: createEngine(babelOptionsTypeScript),
+				patterns: [
+					`static/*.ts`
+				]
+			}));
+	}
+	
+	// Allow minification to be disabled.
+	if (!options.noMinify) {
+		debug(`Minification enabled.`);
+		hoast
+			// Minify the CSS, HTML, and JS files.
+			.use(minify({
+				css: config.minify.css,
+				html: config.minify.html,
+				js: config.minify.js,
+				patternsCSS: `static/*.css`,
+				patternsHTML: `content/*.html`,
+				patternsJS: `static/*.js`
+			}));
+	}
+	
+	hoast
 		// Remove type directory. Result: `static/js/nav.js` -> `js/nav.js`.
-		.use(rename({
-			engine: function(filePath) {
+		.use(convert({
+			engine: function(file) {
 				// Get index of first path separator.
-				let index = filePath.indexOf(path.sep);
+				let index = file.path.indexOf(path.sep);
 				// Sub string past the first path separator.
-				return filePath.substring(index + path.sep.length);
+				return file.path.substring(index + path.sep.length);
 			},
 			patterns: [
 				`content/*`,
@@ -426,22 +603,11 @@ const hoastig = async function(directory, config = {}, options = {}) {
 			]
 		}));
 	
-	// Only minify if not in development mode.
-	if (!options.development) {
-		hoast
-			// Minify the CSS, HTML, and JS files.
-			.use(minify({
-				css: config.minify.css,
-				html: config.minify.html,
-				js: config.minify.js
-			}));
-	}	
-	
 	debug(`Start processing.`);
 	try {
 		// Start the hoast process.
 		await hoast.process();
-	} catch (error) {
+	} catch(error) {
 		debug(`Error encountered during processing.`);
 		throw error;
 	}
