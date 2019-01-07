@@ -298,10 +298,13 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		});
 	}
 	
-	// Continue adding to module stack.
+	if (!options.noChanged) {
+		hoast
+			// Filter out files that have not been changed since the last build.
+			.use(changed());
+	}
+		
 	hoast
-		// Filter out files that have not been changed since the last build.
-		.use(changed())
 		// Read file content.
 		.use(read())
 		// Remove the source sub directory and apply rename configuration to file paths.
