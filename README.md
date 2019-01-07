@@ -5,6 +5,9 @@
   [![npm package @latest](https://img.shields.io/npm/v/hoastig.svg?label=npm@latest&style=flat-square&maxAge=3600)](https://npmjs.com/package/hoastig)
   [![npm package @next](https://img.shields.io/npm/v/hoastig/next.svg?label=npm@next&style=flat-square&maxAge=3600)](https://npmjs.com/package/hoastig/v/next)
   
+  [![Travis-ci status](https://img.shields.io/travis-ci/com/hoast/hoastig.svg?branch=master&label=test%20status&style=flat-square&maxAge=3600)](https://travis-ci.com/hoast/hoastig)
+  [![CodeCov coverage](https://img.shields.io/codecov/c/github/hoast/hoastig/master.svg?label=test%20coverage&style=flat-square&maxAge=3600)](https://codecov.io/gh/hoast/hoastig)
+  
   [![License agreement](https://img.shields.io/github/license/hoast/hoastig.svg?style=flat-square&maxAge=86400)](https://github.com/hoast/hoastig/blob/master/LICENSE)
   [![Open issues on GitHub](https://img.shields.io/github/issues/hoast/hoastig.svg?style=flat-square&maxAge=86400)](https://github.com/hoast/hoastig/issues)
   
