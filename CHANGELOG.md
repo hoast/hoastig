@@ -5,6 +5,7 @@
 + Optional version property added to configuration, used for specifying a minimum version of hoastig to use when building.
 + Transformation of CSS using PostCSS added.
 + Transformation of JavaScript and TypeScript using Babel added.
++ Option added to disable changed module from being added. Use the `noChanged` option or `--no-changed` for the command line interface.
 ### Removed
 + Legacy support for `config.source` configuration option removed.
 + `markdown-it-task-checkbox` markdown-it plugin removed. This can be added back in by adding `markdown-it-task-checkbox` to the `transform.md.plugins` array of the `hoastig.json` config file, and installing the module with a package manager.
