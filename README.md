@@ -48,11 +48,15 @@ If you install it locally you can use the `node node_modules/hoastig/bin/hoastig
 **Options**
 
 ```
--V, --version        output the version number
+-v, --version        output the version number
 -h, --help           output usage information
 -c, --config <path>  path to configuration file (default: hoastig.json)
 -d, --development    process files in development mode
 -r, --remove         remove destination directory beforehand
+--no-changed         prevents changed file from being used or modified
+--no-minify          disables minifying HTML, CSS, and JS files
+--no-transform-css   disables transforming CSS using PostCSS
+--no-transform-js    disables transforming JS/TS using Babel
 ```
 
 > See [development mode](#development-mode) for more information about the `-d` and `--development` options.
@@ -69,13 +73,13 @@ If for any reason you want to use the static page generator as part of node appl
 * `config`: Configuration, see [configuration](#configuration) for more details.
   * Type: `Object`
   * Required: `no`, see configuration section for default values.
-* `options`: Process options.
+* `options`: Process options, all properties are `boolean`s which are set to `false` by default.
   * `development`: Process in [development mode](#development-mode).
-    * Type: `Boolean`
-    * Default: `false`
   * `remove`: Remove the destination directory before processing.
-    * Type: `Boolean`
-    * Default: `false`
+  * `noChanged`: Prevents changed file from being used or modified.
+  * `noMinify`: Disables minifying of HTML, CSS, and JS files.
+  * `noTransformCSS`: Disables transforming of CSS using PostCSS.
+  * `noTransformJS`: Disables transforming of JavaScript and TypeScript using Babel.
 
 **Example**
 
@@ -85,7 +89,7 @@ import hoastig from "hoastig";
 const config = {},
       options = {};
 
-hoastig(__dirname config, options);
+hoastig(__dirname, config, options);
 ```
 
 > The function is asynchronous and can therefore be used in combination with the `await` keyword.
@@ -118,19 +122,26 @@ The development mode is activated when the `-d` or `--development` options is se
     * Default: `false`
 * `transform`: Advanced options used to modify how the CSS, Markdown, and JavaScript are transformed using PostCSS, Markdown-it, and Babel respectively.
   * `css`:
-    * `plugins`: The plugins used by [PostCSS]() to process `.css` files.
+    * `plugins`: The plugins used by [PostCSS](https://github.com/postcss/postcss#readme) to process `.css` files. It takes the form of an array whereby each item is the name of a plugins, or an array whereby the first item is the name of the plugins and the second item are the options for the plugins.
+      * Type: `Array`
+      * Default: `[[ "postcss-preset-env", { stage: 2 } ]]` 
   * `js`: The configuration used by [Babel](https://babeljs.io/docs/en/next/options) to process any `.js` and `.ts`. The `code` property is always set to `true`.
-  * `md`: 
+    * Type: `Object`
+    * Default: `{ presets: [[	"@babel/preset-env", { targets: "> 1%, not dead" } ]] }`
+  * `md`: The options for [Markdown-it](https://github.com/markdown-it/markdown-it#readme) the Markdown to HTML converter.
     * `highlight`: Differs from `mardown-it`'s highlight option! When set to true or to an object then highlighting of code blocks will be enabled. If set to an object it will be given as configuration options to [`Highlight.js`](https://highlightjs.readthedocs.io/en/latest/api.html#configure-options).
       * Type: `Boolean` or `Object`
       * Default: `false`
-* `minify`
+    * `plugins`: Extra property! List the names of the plugins for `markdown-it` to use.
+      * Type: `Array`
+      * Default: `[ 'markdown-it-anchor' ]`
+* `minify`: Options for [hoast-minify](https://github.com/hoast/hoast-minify#parameters).
   * `css`: Options for [clean-css](https://github.com/jakubpawlowicz/clean-css#constructor-options).
     * Type: `Object`
     * Default: `{}`
   * `html`: Options for [html-minifier](https://github.com/kangax/html-minifier#options-quick-reference).
     * Type: `Object`
-    * Default: `{ "collapseWhitespace": true, "removeComments": true }`
+    * Default: `{}`
   * `js`: Options for [terser](https://github.com/terser-js/terser#minify-options).
     * Type: `Object`
     * Default: `{}`
@@ -194,10 +205,7 @@ The development mode is activated when the `-d` or `--development` options is se
   },
   "minify": {
     "css": {},
-    "html": {
-      "collapseWhitespace": true,
-      "removeComments": true
-    },
+    "html": {},
     "js": {}
   },
   
@@ -231,7 +239,7 @@ The source directories are a list of paths relative to the where the program is 
 * `layouts`: Handlebar layouts. Files should have the `.hbs` extension.
 * `partials`: Handlebar partials. Files should either have the `.hbs` or `.html` extension.
 * `static`: Files in this directory will be transferred over to the root of the destinations directory. `.ccs`, `.html`, and `.js` will be automatically minified.
-* `metadata.json`: A JSON file containing metadata for the layout context> The `config.json`'s metadata will be deeply assigned over this.
+* `metadata.json`: A JSON file containing metadata for the layout context. The metadata of other sources and the `hoastig.json`'s metadata will be merged together in the sources order with the `hoastig.json` as last.
 
 > Any files put in the root of a source directory or sub directories not specified in the list above will be ignored by the program. This is useful for storing any `README.md` or other miscellaneous files.
 

@@ -111,8 +111,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 							targets: `> 1%, not dead`
 						}
 					]
-				],
-				plugins: []
+				]
 			},
 			md: {
 				html: true,
@@ -123,10 +122,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		},
 		minify: {
 			css: {},
-			html: {
-				collapseWhitespace: true,
-				removeComments: true
-			},
+			html: {},
 			js: {}
 		},
 		
