@@ -1,10 +1,10 @@
 // Dependency modules.
 const test = require(`ava`);
 // Custom module.
-const Hoastig = require(`../library`);
+const Hoastig = require(`../../library`);
 
 // Get module info.
-const info = require(`../package.json`);
+const info = require(`../../package.json`);
 
 // Default option flags.
 const OPTIONS = {
@@ -31,7 +31,7 @@ test(`equal version`, async function(t) {
 	t.pass();
 });
 
-test(`lower version`, async function(t) {
+test(`lowest version`, async function(t) {
 	// Lowest version possible.
 	const version = `0.0.0`;
 	
@@ -48,7 +48,7 @@ test(`lower version`, async function(t) {
 	t.fail();
 });
 
-test(`major version`, async function(t) {
+test(`major greater version`, async function(t) {
 	// Split semantic versioning up.
 	let version = info.version.split(`.`);
 	// Parse major version number and increment it.
