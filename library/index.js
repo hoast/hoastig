@@ -216,7 +216,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 			
 			// Get all directories leading up to the source directory.
 			// This allows us to construct a pattern that matches the directories leading up to the source directory, but not any content within it.
-			const segments = source.split(`/`);
+			const segments = source.split(/\\|\//g);
 			const length = segments.length - 1;
 			let pattern;
 			if (length > 0) {
@@ -547,7 +547,10 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		);
 		// Add TypeScript preset to to start of the preset array.
 		const configTypeScript = config.transform.js;
-		configTypeScript.plugins.unshift(`@babel/preset-typescript`);
+		if (!configTypeScript.presets) {
+			configTypeScript.presets = [];
+		}
+		configTypeScript.presets.unshift(`@babel/preset-typescript`);
 		const babelOptionsTypeScript = Object.assign(
 			babel.loadOptions(configTypeScript), {
 				code: true
