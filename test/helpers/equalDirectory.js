@@ -69,7 +69,7 @@ const equalDirectory = async function(t, actualDirectory, expectedDirectory, tre
 	}
 	
 	// Compare the content of each directory.
-	return Promise.all(
+	await Promise.all(
 		tree.files.map(function(file) {
 			// If file is a string then it refers to the name of a file in the current directory.
 			if (typeof(file) === `string`) {
