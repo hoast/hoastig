@@ -1,6 +1,8 @@
 // Node modules.
 const fs = require(`fs`),
 	path = require(`path`);
+// Custom modules.
+const equalFile = require(`./equalFile`);
 
 /**
  * Creates a file tree by scanning the given directory recursively.
@@ -24,6 +26,7 @@ const createTree = async function(directory, file = ``) {
 			if (stats.isFile()) {
 				return resolve(file);
 			}
+			// Else must be a directory.
 			
 			// Read directory and invoke this method for all items in it.
 			fs.readdir(directory, function(error, content) {
@@ -36,42 +39,14 @@ const createTree = async function(directory, file = ``) {
 					// Recursively call this again.
 					return createTree(directory, item);
 				})).then(function(results) {
-					return {
+					return resolve({
 						path: file,
 						files: results
-					};
+					});
 				}).catch(reject);
 			});
 		});
 	});
-};
-
-/**
- * Reads and compares file content.
- * @param {Object} t Ava instance.
- * @param {String} actualFile File path of file to compare to.
- * @param {String} expectedFile File path of file to compare with.
- */
-const equalFile = async function(t, actualFile, expectedFile) {
-	// Wrapper so the readFile function can be used as a promise.
-	const readFile = function(filePath) {
-		return new Promise(function(reject, resolve) {
-			fs.readFile(filePath, function(error, data) {
-				if (error) {
-					return reject(error);
-				}
-				
-				resolve(data);
-			});
-		});
-	};
-	
-	try {
-		// Read each file and compare its content.
-		t.deepEqual(await readFile(actualFile), await readFile(expectedFile));
-	} catch(error) {
-		throw error;
-	}
 };
 
 /**
