@@ -28,6 +28,11 @@ const babel = require(`@babel/core`),
 // Custom modules.
 const handlebarsLogic = require(`./handlebarsLogic`);
 
+/**
+ * Removes extensions from at the end of the file path.
+ * @param {String[]} resolved The extension to resolve.
+ * @param {String} fileName The path to remove extensions from.
+ */
 const resolveExtensions = function(resolved, fileName) {
 	// Store extensions.
 	let extensions = fileName.split(`.`);
@@ -52,10 +57,10 @@ const resolveExtensions = function(resolved, fileName) {
 };
 
 /**
- * 
- * @param {String} directory 
- * @param {Object} config 
- * @param {Object} options 
+ * Processes files using hoastig.
+ * @param {String} directory Absolute path to directory to operate from.
+ * @param {Object} config The project configuration, see documentation for more information.
+ * @param {Object} options The build options, see documentation for more information.
  */
 const hoastig = async function(directory, config = {}, options = {}) {
 	debug(`Start hoastig.`);
