@@ -8,13 +8,8 @@ const path = require(`path`);
  * @param {String[]} prefixes Sub directory prefixes (probably test input option)
  * @param {String[]} suffixes Sub directory suffixes (probably directory name type)
  */
-const createDirectoryTable = function(directory, file, prefixes, suffixes) {
-	// Get name of the test file.
-	directory = file.substring(0, file.lastIndexOf(`.`));
-	
-	const result = {
-		__dirname: directory
-	};
+const createDirectoryTable = function(directory, prefixes, suffixes) {
+	const result = {};
 	// Iterate over each test.
 	prefixes.forEach(function(prefix) {
 		// Get name of subdirectory.
