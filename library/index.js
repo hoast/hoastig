@@ -51,8 +51,21 @@ const resolveExtensions = function(resolved, fileName) {
 	return (extensions && extensions.length) ? extensions.unshift(fileName).join(`.`) : fileName;
 };
 
+/**
+ * 
+ * @param {String} directory 
+ * @param {Object} config 
+ * @param {Object} options 
+ */
 const hoastig = async function(directory, config = {}, options = {}) {
 	debug(`Start hoastig.`);
+	
+	// Throw error if directory is not set properly.
+	if (!directory || typeof(directory) !== `string`) {
+		throw {
+			message: `First parameter of hoastig, 'directory', must be a string set to an absolute directory path.`
+		};
+	}
 	
 	// If config has a version listed check wether hoastig version is greater than it.
 	if (config.version) {
