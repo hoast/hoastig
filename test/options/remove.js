@@ -78,8 +78,8 @@ test(`Set false`, async function(t) {
 	// Execute: run hoastig.
 	try {
 		await hoastig(directory, {
-			sources: directoryTable.default.src.relative,
-			destination: directoryTable.default.dst.relative
+			sources: directoryTable.false.src.relative,
+			destination: directoryTable.false.dst.relative
 		}, Object.assign(options, {
 			remove: false
 		}));
@@ -89,7 +89,7 @@ test(`Set false`, async function(t) {
 	
 	// Test: compare actual result with expected result.
 	try {
-		await equalDirectory(t, directoryTable.default.dst.absolute, directoryTable.default.exp.absolute);
+		await equalDirectory(t, directoryTable.false.dst.absolute, directoryTable.false.exp.absolute);
 	} catch(error) {
 		t.fail(error);
 	}
@@ -99,8 +99,8 @@ test(`Set true`, async function(t) {
 	// Execute: run hoastig.
 	try {
 		await hoastig(directory, {
-			sources: directoryTable.default.src.relative,
-			destination: directoryTable.default.dst.relative
+			sources: directoryTable.true.src.relative,
+			destination: directoryTable.true.dst.relative
 		}, Object.assign(options, {
 			remove: true
 		}));
@@ -110,7 +110,7 @@ test(`Set true`, async function(t) {
 	
 	// Test: compare actual result with expected result.
 	try {
-		await equalDirectory(t, directoryTable.default.dst.absolute, directoryTable.default.exp.absolute);
+		await equalDirectory(t, directoryTable.true.dst.absolute, directoryTable.true.exp.absolute);
 	} catch(error) {
 		t.fail(error);
 	}
