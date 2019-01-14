@@ -40,6 +40,7 @@ test.before(`Create files`, async function(t) {
 
 /**
  * Clean-up: always remove build directories.
+*/
 test.after.always(`Remove files`, function(t) {
 	t.plan(1);
 	
@@ -53,7 +54,6 @@ test.after.always(`Remove files`, function(t) {
 		t.fail(error);
 	});
 });
-*/
 
 test(`Default value`, async function(t) {
 	// Execute: run hoastig.
@@ -74,12 +74,44 @@ test(`Default value`, async function(t) {
 	}
 });
 
-/*
 test(`Set false`, async function(t) {
-	t.pass();
+	// Execute: run hoastig.
+	try {
+		await hoastig(directory, {
+			sources: directoryTable.default.src.relative,
+			destination: directoryTable.default.dst.relative
+		}, Object.assign(options, {
+			remove: false
+		}));
+	} catch(error) {
+		t.fail(error);
+	}
+	
+	// Test: compare actual result with expected result.
+	try {
+		await equalDirectory(t, directoryTable.default.dst.absolute, directoryTable.default.exp.absolute);
+	} catch(error) {
+		t.fail(error);
+	}
 });
 
 test(`Set true`, async function(t) {
-	t.pass();
+	// Execute: run hoastig.
+	try {
+		await hoastig(directory, {
+			sources: directoryTable.default.src.relative,
+			destination: directoryTable.default.dst.relative
+		}, Object.assign(options, {
+			remove: true
+		}));
+	} catch(error) {
+		t.fail(error);
+	}
+	
+	// Test: compare actual result with expected result.
+	try {
+		await equalDirectory(t, directoryTable.default.dst.absolute, directoryTable.default.exp.absolute);
+	} catch(error) {
+		t.fail(error);
+	}
 });
-*/
