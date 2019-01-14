@@ -3,7 +3,7 @@ dependencies:
   '@babel/preset-env': 7.2.3
   '@babel/preset-typescript': 7.1.0
   commander: 2.19.0
-  gray-matter: 4.0.1
+  gray-matter: 4.0.2
   highlightjs: 9.12.0
   hoast: 1.1.5
   hoast-changed: 1.1.2
@@ -17,7 +17,7 @@ dependencies:
   jstransformer-handlebars: 1.1.0
   jstransformer-markdown-it: 2.1.0
   markdown-it-anchor: 5.0.2
-  postcss: 7.0.7
+  postcss: 7.0.11
   postcss-preset-env: 6.5.0
   semver: 5.6.0
 devDependencies:
@@ -2235,9 +2235,9 @@ packages:
     dev: true
     resolution:
       integrity: sha512-6uHUhOPEBgQ24HM+r6b/QwWfZq+yiFcipKFrOFiBEnWdy5sdzYoi+pJeQaPI5qOLRFqWmAXUPQNsielzdLoecA==
-  /gray-matter/4.0.1:
+  /gray-matter/4.0.2:
     dependencies:
-      js-yaml: 3.12.0
+      js-yaml: 3.12.1
       kind-of: 6.0.2
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
@@ -2245,7 +2245,7 @@ packages:
     engines:
       node: '>=6.0'
     resolution:
-      integrity: sha512-p0MADBEBl1CohV7nRZ8sVinBexEe3CKVhh0A0QIHKpcbRoxB0VgeMpRPjW/HBHIPLAKrpIIIm5mZ6hKu3E+iQg==
+      integrity: sha512-7hB/+LxrOjq/dd8APlK0r24uL/67w7SkYnfwhNFwg/VDIGWGmduTDYf3WNstLW2fbbmRwrDGCVSJ2isuf2+4Hw==
   /handlebars/4.0.12:
     dependencies:
       async: 2.6.1
@@ -2872,6 +2872,7 @@ packages:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
+    dev: true
     hasBin: true
     resolution:
       integrity: sha512-PIt2cnwmPfL4hKNwqeiuz4bKfnzHTBv6HyVgjahA6mPLwPDzjDWrplJBMjHUFxku/N3FlmrbyPclad+I+4mJ3A==
@@ -2879,7 +2880,6 @@ packages:
     dependencies:
       argparse: 1.0.10
       esprima: 4.0.1
-    dev: true
     hasBin: true
     resolution:
       integrity: sha512-um46hB9wNOKlwkHgiuyEVAybXBjwFUV0Z/RaHJblRd9DXltue9FTYvzCr9ErQrK9Adz5MU4gHWVaNUfdmrC8qA==
@@ -4068,6 +4068,16 @@ packages:
       node: '>=6.14.4'
     resolution:
       integrity: sha512-cyRdkgbRRefu91ByAlJow4y9w/hnBmmWgLpWmlFQ2bpIy2eKrqowt3VeYcaHQ08otVXmC9V2JtYW1Z/RpvYR8A==
+  /postcss/7.0.11:
+    dependencies:
+      chalk: 2.4.2
+      source-map: 0.6.1
+      supports-color: 6.1.0
+    dev: false
+    engines:
+      node: '>=6.0.0'
+    resolution:
+      integrity: sha512-9AXb//5UcjeOEof9T+yPw3XTa5SL207ZOIC/lHYP4mbUTEh4M0rDAQekQpVANCZdwQwKhBtFZCk3i3h3h2hdWg==
   /postcss/7.0.7:
     dependencies:
       chalk: 2.4.1
@@ -4752,7 +4762,6 @@ packages:
   /supports-color/6.1.0:
     dependencies:
       has-flag: 3.0.0
-    dev: true
     engines:
       node: '>=6'
     resolution:
@@ -5169,7 +5178,7 @@ specifiers:
   commander: ^2.19.0
   debug: ^4.1.1
   eslint: ^5.12.0
-  gray-matter: ^4.0.1
+  gray-matter: ^4.0.2
   highlightjs: ^9.12.0
   hoast: ^1.1.5
   hoast-changed: ^1.1.2
@@ -5184,6 +5193,6 @@ specifiers:
   jstransformer-markdown-it: ^2.1.0
   markdown-it-anchor: ^5.0.2
   nyc: ^13.1.0
-  postcss: ^7.0.7
+  postcss: ^7.0.11
   postcss-preset-env: ^6.5.0
   semver: ^5.6.0
