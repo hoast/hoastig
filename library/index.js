@@ -53,7 +53,7 @@ const resolveExtensions = function(resolved, fileName) {
 	}
 	
 	// Return file name with left over extensions.
-	return (extensions && extensions.length) ? extensions.unshift(fileName).join(`.`) : fileName;
+	return extensions && extensions.length ? [ fileName, ...extensions ].join(`.`) : fileName;
 };
 
 /**
@@ -140,7 +140,10 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		},
 		minify: {
 			css: {},
-			html: {},
+			html: {
+				collapseWhitespace: true,
+				removeComments: true
+			},
 			js: {}
 		},
 		
@@ -615,7 +618,9 @@ const hoastig = async function(directory, config = {}, options = {}) {
 				// Get index of first path separator.
 				let index = file.path.indexOf(path.sep);
 				// Sub string past the first path separator.
-				return file.path.substring(index + path.sep.length);
+				return {
+					path: file.path.substring(index + path.sep.length)
+				};
 			},
 			patterns: [
 				`content/*`,

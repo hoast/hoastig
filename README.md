@@ -134,14 +134,14 @@ The development mode is activated when the `-d` or `--development` options is se
       * Default: `false`
     * `plugins`: Extra property! List the names of the plugins for `markdown-it` to use.
       * Type: `Array`
-      * Default: `[ 'markdown-it-anchor' ]`
+      * Default: `[ "markdown-it-anchor" ]`
 * `minify`: Options for [hoast-minify](https://github.com/hoast/hoast-minify#parameters).
   * `css`: Options for [clean-css](https://github.com/jakubpawlowicz/clean-css#constructor-options).
     * Type: `Object`
     * Default: `{}`
   * `html`: Options for [html-minifier](https://github.com/kangax/html-minifier#options-quick-reference).
     * Type: `Object`
-    * Default: `{}`
+    * Default: `{ "collapseWhitespace": true, "removeComments": true }`
   * `js`: Options for [terser](https://github.com/terser-js/terser#minify-options).
     * Type: `Object`
     * Default: `{}`
