@@ -48,7 +48,7 @@
     "gray-matter": "^4.0.1",
     "highlightjs": "^9.12.0",
     "hoast": "^1.1.5",
-    "hoast-changed": "^1.1.1",
+    "hoast-changed": "^1.1.2",
     "hoast-convert": "^2.0.0",
     "hoast-filter": "^1.1.1",
     "hoast-frontmatter": "^1.2.1",

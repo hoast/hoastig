@@ -6,7 +6,7 @@ dependencies:
   gray-matter: 4.0.1
   highlightjs: 9.12.0
   hoast: 1.1.5
-  hoast-changed: 1.1.1
+  hoast-changed: 1.1.2
   hoast-convert: 2.0.0
   hoast-filter: 1.1.1
   hoast-frontmatter: 1.2.1
@@ -2323,12 +2323,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-eAhWMtDZaOZIQdxIP4UEB1vNp/CVXQPdMSihTSuaExhFIRC0BVpXbtP3mTP1hDoGOyh7nbB3cuC3sOPhG5wGDA==
-  /hoast-changed/1.1.1:
+  /hoast-changed/1.1.2:
     dev: false
     engines:
       node: '>=7.8.0'
     resolution:
-      integrity: sha512-jDhZZOxmDkInz6OXigGZw3VW2V7tuZjUwTAaJdgfWULA/LsUwxYFvjnRG4pUUmiHbpkWxPTJ5NOgquqK3fvf+w==
+      integrity: sha512-l8x2tcMKHqg8LyMzV9JL7vrjsC36Pf+0+FDqlaBYDqrr7HIZc0gHUU6zF2bqaxQ0I6uH5WiTiNLcsA7jBilU5Q==
   /hoast-convert/2.0.0:
     dev: false
     engines:
@@ -5172,7 +5172,7 @@ specifiers:
   gray-matter: ^4.0.1
   highlightjs: ^9.12.0
   hoast: ^1.1.5
-  hoast-changed: ^1.1.1
+  hoast-changed: ^1.1.2
   hoast-convert: ^2.0.0
   hoast-filter: ^1.1.1
   hoast-frontmatter: ^1.2.1
