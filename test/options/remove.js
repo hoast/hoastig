@@ -55,7 +55,7 @@ test.after.always(`Remove files`, function(t) {
 	});
 });
 
-test(`Default value`, async function(t) {
+test(`default`, async function(t) {
 	// Execute: run hoastig.
 	try {
 		await hoastig(directory, {
@@ -74,13 +74,13 @@ test(`Default value`, async function(t) {
 	}
 });
 
-test(`Set false`, async function(t) {
+test(`false`, async function(t) {
 	// Execute: run hoastig.
 	try {
 		await hoastig(directory, {
 			sources: directoryTable.false.src.relative,
 			destination: directoryTable.false.dst.relative
-		}, Object.assign(options, {
+		}, Object.assign({}, options, {
 			remove: false
 		}));
 	} catch(error) {
@@ -95,13 +95,13 @@ test(`Set false`, async function(t) {
 	}
 });
 
-test(`Set true`, async function(t) {
+test(`true`, async function(t) {
 	// Execute: run hoastig.
 	try {
 		await hoastig(directory, {
 			sources: directoryTable.true.src.relative,
 			destination: directoryTable.true.dst.relative
-		}, Object.assign(options, {
+		}, Object.assign({}, options, {
 			remove: true
 		}));
 	} catch(error) {

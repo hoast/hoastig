@@ -6,6 +6,15 @@ const Hoastig = require(`../../library`);
 // Get module info.
 const info = require(`../../package.json`);
 
+const options = {
+	develop: false,
+	noChanged: true,
+	noTransformCSS: true,
+	noTransformJS: true,
+	noMinify: true,
+	remove: false
+};
+
 test(`equal version`, async function(t) {
 	// Use same version as package.
 	const version = info.version;
@@ -14,7 +23,7 @@ test(`equal version`, async function(t) {
 	try {
 		await Hoastig(__dirname, {
 			version: version
-		});
+		}, options);
 	} catch(error) {
 		t.fail();
 		return;
@@ -31,7 +40,7 @@ test(`lowest version`, async function(t) {
 	try {
 		await Hoastig(__dirname, {
 			version: version
-		});
+		}, options);
 	} catch(error) {
 		t.pass();
 		return;
@@ -52,7 +61,7 @@ test(`major greater version`, async function(t) {
 	try {
 		await Hoastig(__dirname, {
 			version: version
-		});
+		}, options);
 	} catch(error) {
 		t.pass();
 		return;
