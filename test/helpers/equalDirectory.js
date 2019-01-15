@@ -1,7 +1,7 @@
 // Node modules.
 const path = require(`path`);
 // Custom modules.
-const constructTree = require(`constructTree`),
+const constructTree = require(`./constructTree`),
 	equalFile = require(`./equalFile`);
 
 /**
