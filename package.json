@@ -36,8 +36,8 @@
   ],
   "scripts": {
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "posttest": "eslint library/**/*.js bin/**/*.js test/**/*.js",
-    "test": "nyc --reporter=text ava \"test/**/*.js\" --verbose",
+    "posttest": "eslint library/**/*.js bin/**/*.js test/*/*.js",
+    "test": "nyc --reporter=text ava \"test/*/*.js\" --verbose",
     "next": "npm publish --tag next"
   },
   "dependencies": {
