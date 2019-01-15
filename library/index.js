@@ -521,8 +521,8 @@ const hoastig = async function(directory, config = {}, options = {}) {
 				
 				// Create data of newly converted file.
 				let converted = {
+					path: (!file.path.endsWith(`.ts`)) ? file.path : file.path.substring(0, file.path.lastIndexOf(`.`)).concat(`.js`),
 					content: {
-						path: file.path.substring(0, file.path.lastIndexOf(`.`)).concat(`.js`),
 						data: results.code
 					}
 				};
