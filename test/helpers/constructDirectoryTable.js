@@ -8,7 +8,7 @@ const path = require(`path`);
  * @param {String[]} prefixes Sub directory prefixes (probably test input option)
  * @param {String[]} suffixes Sub directory suffixes (probably directory name type)
  */
-const createDirectoryTable = function(directory, prefixes, suffixes) {
+const constructDirectoryTable = function(directory, prefixes, suffixes) {
 	const result = {};
 	// Iterate over each test.
 	prefixes.forEach(function(prefix) {
@@ -25,4 +25,4 @@ const createDirectoryTable = function(directory, prefixes, suffixes) {
 	return result;
 };
 
-module.exports = createDirectoryTable;
+module.exports = constructDirectoryTable;

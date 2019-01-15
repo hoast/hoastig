@@ -1,8 +1,7 @@
 // Dependency modules.
 const test = require(`ava`);
-// Custom module.
 // Helper modules.
-const createDirectoryTable = require(`../helpers/createDirectoryTable`),
+const constructDirectoryTable = require(`../helpers/constructDirectoryTable`),
 	equalDirectory = require(`../helpers/equalDirectory`),
 	removeFile = require(`../helpers/removeFile`);
 // Library module.
@@ -10,7 +9,7 @@ const hoastig = require(`../../library`);
 
 // Create overview of test directory paths.
 const directory = __filename.substring(0, __filename.lastIndexOf(`.`));
-const directoryTable = createDirectoryTable(directory, [ `default`, `false`, `true` ], [ `dst`, `exp`, `src` ]);
+const directoryTable = constructDirectoryTable(directory, [ `default`, `false`, `true` ], [ `dst`, `exp`, `src` ]);
 
 const options = {
 	develop: false,
