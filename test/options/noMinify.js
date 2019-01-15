@@ -12,7 +12,7 @@ const directory = __filename.substring(0, __filename.lastIndexOf(`.`));
 const directoryTable = constructDirectoryTable(directory, [ `default`, `false`, `true` ], [ `dst`, `exp`, `src` ]);
 
 const options = {
-	develop: false,
+	development: false,
 	noChanged: true,
 	noTransformCSS: true,
 	noTransformJS: true,

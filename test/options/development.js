@@ -1,9 +1,4 @@
 // Dependency modules.
 const test = require(`ava`);
-// Custom module.
-//const Hoastig = require(`../../library`);
 
-test(`default`, function(t) {
-	// TODO: Finish test.
-	t.pass();
-});
+test.todo(`Test options.development's concurrency and site_url change`);
