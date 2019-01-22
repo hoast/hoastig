@@ -246,6 +246,7 @@ The source directories are a list of paths relative to the where the program is 
 #### Default example
 
 ```
+...
 ├── dst/
 ├── src/
 │   ├── content/
@@ -275,6 +276,7 @@ hoastig.json:
 Directory structure:
 
 ```
+...
 ├── destination/
 ├── site/
 │   ├── content/

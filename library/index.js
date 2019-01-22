@@ -1,13 +1,8 @@
 // Node modules.
 const fs = require(`fs`),
 	path = require(`path`);
-
 // If debug available require it.
 let debug; try { debug = require(`debug`)(`hoastig`); } catch (error) { debug = function() {}; }
-
-// Get module info.
-const info = require(`../package.json`);
-
 // hoast modules.
 const Hoast = require(`hoast`);
 const read = Hoast.read,
@@ -18,51 +13,89 @@ const read = Hoast.read,
 	layout = require(`hoast-layout`),
 	minify = require(`hoast-minify`),
 	transform = require(`hoast-transform`);
-
 // Additional modules.
 const babel = require(`@babel/core`),
 	graymatter = require(`gray-matter`),
 	postcss = require(`postcss`),
 	semver = require(`semver`);
+// Library modules.
+const handlebarsLogic = require(`./handlebarsLogic`),
+	resolveExtensions = require(`./resolveExtensions`);
 
-// Custom modules.
-const handlebarsLogic = require(`./handlebarsLogic`);
+// Get module info.
+const info = require(`../package.json`);
 
-/**
- * Removes extensions from at the end of the file path.
- * @param {String[]} resolved The extension to resolve.
- * @param {String} fileName The path to remove extensions from.
- */
-const resolveExtensions = function(resolved, fileName) {
-	// Store extensions.
-	let extensions = fileName.split(`.`);
-	// Get base file name.
-	fileName = extensions[0];
-	// Remove base file name.
-	extensions = extensions.slice(1);
+const DEFAULT_CONFIG = {
+	destination: `dst`,
+	sources: [
+		`src`
+	],
 	
-	// Remove any extensions that will be resolved.
-	for (let i = extensions.length - 1; i >= 0; i--) {
-		if (resolved.indexOf(extensions[i]) >= 0) {
-			// Remove extension from list.
-			extensions.pop();
-		} else {
-			// Stop once the first extension is encountered that will not be transformed away.
-			break;
+	metadata: {},
+	
+	rename: {
+		prettify: true,
+		underscore: false
+	},
+	transform: {
+		css: {
+			plugins: [
+				[
+					`postcss-preset-env`, {
+						stage: 2
+					}
+				]
+			]
+		},
+		js: {
+			presets: [
+				[
+					`@babel/preset-env`, {
+						targets: `> 1%, not dead`
+					}
+				]
+			]
+		},
+		md: {
+			html: true,
+			plugins: [
+				`markdown-it-anchor`
+			]
 		}
-	}
+	},
+	minify: {
+		css: {},
+		html: {
+			collapseWhitespace: true,
+			removeComments: true
+		},
+		js: {}
+	},
 	
-	// Return file name with left over extensions.
-	return extensions && extensions.length ? [ fileName, ...extensions ].join(`.`) : fileName;
+	concurrency: Infinity,
+	
+	development: {
+		concurrency: undefined,
+		host: `localhost`,
+		port: 8080
+	}
+};
+const DEFAULT_OPTIONS = {
+	development: false,
+	noChanged: false,
+	noMinify: false,
+	noTransformCSS: false,
+	noTransformJS: false,
+	remove: false
 };
 
 /**
  * Processes files using hoastig.
- * @param {String} directory Absolute path to directory to operate from.
- * @param {Object} config The project configuration, see documentation for more information.
- * @param {Object} options The build options, see documentation for more information.
+ * @param {string} directory Absolute path to directory to operate from.
+ * @param {object} config The project configuration, see documentation for more information.
+ * @param {object} options The build options, see documentation for more information.
  */
-const hoastig = async function(directory, config = {}, options = {}) {
+const hoastig = async function(directory, config, options) {
 	debug(`Start hoastig.`);
 	
 	// Throw error if directory is not set properly.
@@ -72,90 +105,44 @@ const hoastig = async function(directory, config = {}, options = {}) {
 		};
 	}
 	
-	// If config has a version listed check wether hoastig version is greater than it.
-	if (config.version) {
-		let errorMessage;
-		if (semver.lt(info.version, config.version)) {
-			// If hoastig version is lower than config specified version.
-			errorMessage = `Build canceled. Minimum hoastig version in the configuration is ${config.version}, however you are running hoastig version ${info.version}. Please upgrade hoastig, or downgrade the version in your configuration.`;
-		} else if (semver.major(info.version) !== semver.major(config.version)) {
-			// Different major version, must be higher since previous if excluded anything lower.
-			errorMessage = `Build canceled. Hoastig version is '${info.version}', this is one or more major versions above the hoastig version in the configuration '${config.version}'. Please upgrade the version in your configuration, or downgrade hoastig.`;
-		}
-		
-		if (errorMessage) {
-			debug(`Error encountered during version comparison.`);
-			throw {
-				message: errorMessage
-			};
-		}
-	}
-	
-	// If `config.sources` is a string turn it into an array.
-	if (config.sources && typeof(config.sources) === `string`) {
-		config.sources = [
-			config.sources
-		];
-	}
-	
-	debug(`Start merging configuration with default.`);
-	// Override default config with user defined config.
-	config = Hoast.helpers.deepAssign({
-		destination: `dst`,
-		sources: [
-			`src`
-		],
-		
-		metadata: {},
-		
-		rename: {
-			prettify: true,
-			underscore: false
-		},
-		transform: {
-			css: {
-				plugins: [
-					[
-						`postcss-preset-env`, {
-							stage: 2
-						}
-					]
-				]
-			},
-			js: {
-				presets: [
-					[
-						`@babel/preset-env`, {
-							targets: `> 1%, not dead`
-						}
-					]
-				]
-			},
-			md: {
-				html: true,
-				plugins: [
-					`markdown-it-anchor`
-				]
+	if (config) {
+		// If config has a version listed check wether hoastig version is greater than it.
+		if (config.version) {
+			let errorMessage;
+			if (semver.lt(info.version, config.version)) {
+				// If hoastig version is lower than config specified version.
+				errorMessage = `Build canceled. Minimum hoastig version in the configuration is ${config.version}, however you are running hoastig version ${info.version}. Please upgrade hoastig, or downgrade the version in your configuration.`;
+			} else if (semver.major(info.version) !== semver.major(config.version)) {
+				// Different major version, must be higher since previous if excluded anything lower.
+				errorMessage = `Build canceled. Hoastig version is '${info.version}', this is one or more major versions above the hoastig version in the configuration '${config.version}'. Please upgrade the version in your configuration, or downgrade hoastig.`;
 			}
-		},
-		minify: {
-			css: {},
-			html: {
-				collapseWhitespace: true,
-				removeComments: true
-			},
-			js: {}
-		},
-		
-		concurrency: Infinity,
-		
-		development: {
-			concurrency: undefined,
-			host: `localhost`,
-			port: 8080
+			
+			if (errorMessage) {
+				debug(`Error encountered during version comparison.`);
+				throw {
+					message: errorMessage
+				};
+			}
 		}
-	}, config);
-	debug(`Config assigned over default.`);
+		
+		// If `config.sources` is a string turn it into an array.
+		if (config.sources && typeof(config.sources) === `string`) {
+			config.sources = [
+				config.sources
+			];
+		}
+		
+		debug(`Start merging configuration with default.`);
+		// Override default config with user defined config.
+		config = Hoast.helpers.deepAssign({}, DEFAULT_CONFIG, config);
+		debug(`Config assigned over default.`);
+	} else {
+		debug(`Using default configuration.`);
+		config = DEFAULT_CONFIG;
+	}
+	
+	// Merge default with given options..
+	options = Object.assign(DEFAULT_OPTIONS, options);
 	
 	// Merge `metadata.json` files of source directories with `config.metadata`.
 	if (config.sources && config.sources.length > 1) {
@@ -219,7 +206,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 				config.metadata.site_url = `http://${config.metadata.site_url}`;
 			}
 			
-			debug(`'metadata.site_url' is set to 'development.host:development.port' of '${config.metadata.site_url}'.`);
+			debug(`'metadata.site_url' is set to 'development.host:development.port' resulting in '${config.metadata.site_url}'.`);
 		}
 	}
 	
@@ -320,7 +307,7 @@ const hoastig = async function(directory, config = {}, options = {}) {
 			// Filter out files that have not been changed since the last build.
 			.use(changed());
 	}
-		
+	
 	hoast
 		// Read file content.
 		.use(read())

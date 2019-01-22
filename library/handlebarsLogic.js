@@ -17,9 +17,9 @@ const EXTENSIONS_TEXT = [
 
 /**
  * Scan a for files recursively.
- * @param {String} directory directory name.
- * @param {String[]} arguments file path, possibly split up in segments but in order.
- * @returns Array of string containing each files path.
+ * @param {string} directory directory name.
+ * @param {string[]} arguments file path, possibly split up in segments but in order.
+ * @returns String[] containing each files path.
  */
 const getFilePaths = function(directory) {
 	let absolute = path.join(...arguments),
@@ -62,7 +62,7 @@ const getFilePaths = function(directory) {
 
 /**
  * Retrieves code of file.
- * @param {String} filePath Path to file.
+ * @param {string} filePath Path to file.
  */
 const getFileCode = function(filePath) {
 	// Get extension.
@@ -83,7 +83,7 @@ const getFileCode = function(filePath) {
 
 /**
  * Retrieves text of file.
- * @param {String} filePath Path to file.
+ * @param {string} filePath Path to file.
  */
 const getFileText = function(filePath) {
 	// Get extension.
@@ -108,8 +108,8 @@ const getFileText = function(filePath) {
 
 /**
  * Retrieves 'decorators', 'helpers', and 'partials' from sources.
- * @param {String[]} sources Source directories.
- * @param {Number} concurrency Maximum number of files to process at once.
+ * @param {string[]} sources Source directories.
+ * @param {number} concurrency Maximum number of files to process at once.
  */
 const handlebarsLogic = async function(sources, concurrency = Infinity) {
 	debug(`Looking for files in directories '${sources}'.`);
