@@ -4,8 +4,8 @@ const fs = require(`fs`),
 
 /**
  * Creates a file tree by scanning the given directory recursively.
- * @param {String} directory Absolute path to directory.
- * @param {String} fileName Name of
+ * @param {string} directory Absolute path to directory.
+ * @param {string} fileName Name of
  */
 const constructTree = async function(directory, file = ``) {
 	// Create absolute path.
@@ -20,7 +20,7 @@ const constructTree = async function(directory, file = ``) {
 				return reject(error);
 			}
 			
-			// If it is a file resolve with its stats.
+			// Check if file.
 			if (stats.isFile()) {
 				return resolve(file);
 			}

@@ -15,7 +15,7 @@ const options = {
 	remove: false
 };
 
-test(`equal version`, async function(t) {
+test(`Version same as project`, async function(t) {
 	// Use same version as package.
 	const version = info.version;
 	
@@ -32,7 +32,7 @@ test(`equal version`, async function(t) {
 	t.pass();
 });
 
-test(`lowest version`, async function(t) {
+test(`Version 0.0.0`, async function(t) {
 	// Lowest version possible.
 	const version = `0.0.0`;
 	
@@ -42,14 +42,14 @@ test(`lowest version`, async function(t) {
 			version: version
 		}, options);
 	} catch(error) {
-		t.pass();
+		t.pass(); // Test is expected to fail!
 		return;
 	}
 	
 	t.fail();
 });
 
-test(`major greater version`, async function(t) {
+test(`Version major greater`, async function(t) {
 	// Split semantic versioning up.
 	let version = info.version.split(`.`);
 	// Parse major version number and increment it.
@@ -63,7 +63,7 @@ test(`major greater version`, async function(t) {
 			version: version
 		}, options);
 	} catch(error) {
-		t.pass();
+		t.pass(); // Test is expected to fail!
 		return;
 	}
 	

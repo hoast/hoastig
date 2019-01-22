@@ -1,0 +1,1 @@
+module.exports = require(`hoast/library/helpers/removeFiles`);

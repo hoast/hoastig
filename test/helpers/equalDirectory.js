@@ -6,10 +6,10 @@ const constructTree = require(`./constructTree`),
 
 /**
  * Compares the content of each file in the directory and sub-directories.
- * @param {Object} t Ava instance.
- * @param {String} actualDirectory Directory path of directory to compare to.
- * @param {String} expectedDirectory Directory path of directory to compare with.
- * @param {Object} tree File tree of directory to compare.
+ * @param {object} t Ava instance.
+ * @param {string} actualDirectory Directory path of directory to compare to.
+ * @param {string} expectedDirectory Directory path of directory to compare with.
+ * @param {object} tree File tree of directory to compare.
  */
 const equalDirectory = async function(t, actualDirectory, expectedDirectory, tree) {
 	if (!tree) {

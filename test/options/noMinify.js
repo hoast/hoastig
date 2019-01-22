@@ -1,15 +1,15 @@
+// Node modules.
+const path = require(`path`);
 // Dependency modules.
 const test = require(`ava`);
 // Helper modules.
-const constructDirectoryTable = require(`../helpers/constructDirectoryTable`),
-	equalDirectory = require(`../helpers/equalDirectory`),
-	removeFile = require(`../helpers/removeFile`);
+const equalDirectory = require(`../helpers/equalDirectory`),
+	removeFiles = require(`../helpers/removeFiles`);
 // Library module.
 const hoastig = require(`../../library`);
 
 // Create overview of test directory paths.
 const directory = __filename.substring(0, __filename.lastIndexOf(`.`));
-const directoryTable = constructDirectoryTable(directory, [ `default`, `false`, `true` ], [ `dst`, `exp`, `src` ]);
 
 const options = {
 	development: false,
@@ -22,76 +22,64 @@ const options = {
 /**
  * Clean-up: always remove build directories.
 */
-test.after.always(`Remove files`, function(t) {
-	t.plan(1);
+test.after.always(`Remove files`, async function(t) {
+	try {
+		await removeFiles([
+			path.join(directory, `default-dst`),
+			path.join(directory, `false-dst`),
+			path.join(directory, `true-dst`)
+		]);
+	} catch(error) {
+		return t.fail(error);
+	}
 	
-	return Promise.all(
-		Object.keys(directoryTable).map(function(testName) {
-			return removeFile(directoryTable[testName].dst.absolute);
-		})
-	).then(function() {
-		t.pass();
-	}).catch(function(error) {
-		t.fail(error);
-	});
+	t.pass();
 });
 
 test(`default`, async function(t) {
-	// Execute: run hoastig.
 	try {
+		// Run hoastig.
 		await hoastig(directory, {
-			sources: directoryTable.default.src.relative,
-			destination: directoryTable.default.dst.relative
+			destination: `default-dst`,
+			sources: `default-src`
 		}, options);
-	} catch(error) {
-		t.fail(error);
-	}
-	
-	// Test: compare actual result with expected result.
-	try {
-		await equalDirectory(t, directoryTable.default.dst.absolute, directoryTable.default.exp.absolute);
+		
+		// Compare actual result with expected result.
+		await equalDirectory(t, path.join(directory, `default-dst`), path.join(directory, `default-exp`));
 	} catch(error) {
 		t.fail(error);
 	}
 });
 
 test(`false`, async function(t) {
-	// Execute: run hoastig.
 	try {
+		// Run hoastig.
 		await hoastig(directory, {
-			sources: directoryTable.false.src.relative,
-			destination: directoryTable.false.dst.relative
+			destination: `false-dst`,
+			sources: `false-src`
 		}, Object.assign({}, options, {
 			noMinify: false
 		}));
-	} catch(error) {
-		t.fail(error);
-	}
-	
-	// Test: compare actual result with expected result.
-	try {
-		await equalDirectory(t, directoryTable.false.dst.absolute, directoryTable.false.exp.absolute);
+		
+		// Compare actual result with expected result.
+		await equalDirectory(t, path.join(directory, `false-dst`), path.join(directory, `false-exp`));
 	} catch(error) {
 		t.fail(error);
 	}
 });
 
 test(`true`, async function(t) {
-	// Execute: run hoastig.
 	try {
+		// Run hoastig.
 		await hoastig(directory, {
-			sources: directoryTable.true.src.relative,
-			destination: directoryTable.true.dst.relative
+			destination: `true-dst`,
+			sources: `true-src`
 		}, Object.assign({}, options, {
 			noMinify: true
 		}));
-	} catch(error) {
-		t.fail(error);
-	}
-	
-	// Test: compare actual result with expected result.
-	try {
-		await equalDirectory(t, directoryTable.true.dst.absolute, directoryTable.true.exp.absolute);
+		
+		// Compare actual result with expected result.
+		await equalDirectory(t, path.join(directory, `true-dst`), path.join(directory, `true-exp`));
 	} catch(error) {
 		t.fail(error);
 	}
