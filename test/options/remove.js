@@ -25,7 +25,7 @@ const options = {
  */
 test.before(`Create files`, async function(t) {
 	try {
-		Promise.all(
+		await Promise.all(
 			[{
 				dst: path.join(directory, `default-dst`),
 				src: path.join(directory, `default-bfr`)
@@ -105,6 +105,7 @@ test(`true`, async function(t) {
 			remove: true
 		}));
 		
+		// Compare actual result with expected result.
 		await equalDirectory(t, path.join(directory, `true-dst`), path.join(directory, `true-exp`));
 	} catch(error) {
 		t.fail(error);

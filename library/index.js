@@ -133,7 +133,7 @@ const hoastig = async function(directory, config, options) {
 		}
 		
 		debug(`Start merging configuration with default.`);
-		// Override default config with user defined config.
+		// Merge default config with user defined config.
 		config = Hoast.helpers.deepAssign({}, DEFAULT_CONFIG, config);
 		debug(`Config assigned over default.`);
 	} else {
@@ -141,8 +141,8 @@ const hoastig = async function(directory, config, options) {
 		config = DEFAULT_CONFIG;
 	}
 	
-	// Merge default with given options..
-	options = Object.assign({}, DEFAULT_OPTIONS, options);
+	// Merge default options with user defined options.
+	options = options ? Object.assign({}, DEFAULT_OPTIONS, options) : DEFAULT_OPTIONS;
 	
 	// Merge `metadata.json` files of source directories with `config.metadata`.
 	if (config.sources && config.sources.length > 1) {
