@@ -5,14 +5,13 @@ dependencies:
   commander: 2.19.0
   gray-matter: 4.0.2
   highlightjs: 9.12.0
-  hoast: 1.1.5
+  hoast: 1.1.6
   hoast-changed: 1.1.2
   hoast-convert: 2.0.0
   hoast-filter: 1.1.1
   hoast-frontmatter: 1.2.1
   hoast-layout: 1.3.0
   hoast-minify: 1.2.0
-  hoast-rename: 1.1.1
   hoast-transform: 1.1.1
   jstransformer-handlebars: 1.1.0
   jstransformer-markdown-it: 2.1.0
@@ -2396,13 +2395,6 @@ packages:
       node: '>=7.8.0'
     resolution:
       integrity: sha512-0oYw5UWy8RGBUs/svL3q/z0MxA/NhmTE94GLG7V+5HM8yb6p7A85Vd6ErAQAIE/UUkkRnjitWFtoIY0Xxn+jUQ==
-  /hoast-rename/1.1.1:
-    deprecated: 'The `hoast-convert` does everything this module can do, and more!'
-    dev: false
-    engines:
-      node: '>=7.8.0'
-    resolution:
-      integrity: sha512-ttp8hVA+dnNPcmzhot8LkTvY/7Lu6dF+i5WsgAmhU33NB3Qx/NMci4J30E5evpY25SirZME5sTXa7C6xBQRN+Q==
   /hoast-transform/1.1.1:
     dependencies:
       inputformat-to-jstransformer: 1.3.2
@@ -2412,7 +2404,7 @@ packages:
       node: '>=7.8.0'
     resolution:
       integrity: sha512-KorP7Yg9dYYIEXeuf1ut9UBTlwYZUdCmfCJ8hWIGZr4mNHoBUy87OGbDmDdyYcIGIwK6JxVURnLahaNfiaD10Q==
-  /hoast/1.1.5:
+  /hoast/1.1.6:
     dependencies:
       commander: 2.19.0
       isutf8: 2.0.3
@@ -2422,7 +2414,7 @@ packages:
       node: '>=7.8.0'
     hasBin: true
     resolution:
-      integrity: sha512-Cwwwo/gi/KntgxHESLLhNN7tgnpKh6xK0tHfpIsNEnHIUElGHkzSC9UAhzpqAzTwm/ghUoGzOT7HTtYbPJJaYw==
+      integrity: sha512-e6h5Q3+ysx1/qulDUNvggDdcurMFZIzvrVVl0aOf2vEHh4scXB2xZnmlqlhhZTMvOulKKrEfDlYds2LW0vqtkg==
   /hosted-git-info/2.7.1:
     dev: true
     resolution:
@@ -5289,14 +5281,13 @@ specifiers:
   eslint: ^5.12.0
   gray-matter: ^4.0.2
   highlightjs: ^9.12.0
-  hoast: ^1.1.5
+  hoast: ^1.1.6
   hoast-changed: ^1.1.2
   hoast-convert: ^2.0.0
   hoast-filter: ^1.1.1
   hoast-frontmatter: ^1.2.1
   hoast-layout: ^1.3.0
   hoast-minify: ^1.2.0
-  hoast-rename: ^1.1.1
   hoast-transform: ^1.1.1
   jstransformer-handlebars: ^1.1.0
   jstransformer-markdown-it: ^2.1.0
