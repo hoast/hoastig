@@ -142,7 +142,7 @@ const hoastig = async function(directory, config, options) {
 	}
 	
 	// Merge default with given options..
-	options = Object.assign(DEFAULT_OPTIONS, options);
+	options = Object.assign({}, DEFAULT_OPTIONS, options);
 	
 	// Merge `metadata.json` files of source directories with `config.metadata`.
 	if (config.sources && config.sources.length > 1) {
