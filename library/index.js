@@ -20,6 +20,7 @@ const babel = require(`@babel/core`),
 	semver = require(`semver`);
 // Library modules.
 const handlebarsLogic = require(`./handlebarsLogic`),
+	ipAddresses = require(`./ipAddresses`),
 	resolveExtensions = require(`./resolveExtensions`);
 
 // Get module info.
@@ -76,7 +77,6 @@ const DEFAULT_CONFIG = {
 	
 	development: {
 		concurrency: undefined,
-		host: `localhost`,
 		port: 8080
 	}
 };
@@ -199,6 +199,11 @@ const hoastig = async function(directory, config, options) {
 		
 		// Overwrite `site_url` in metadata.
 		if (config.metadata.site_url) {
+			// Dynamically get local IP address.
+			if (!config.development.host) {
+				const ipAddress = ipAddresses();
+				config.development.host = ipAddress.length ? ipAddress[0] : `localhost`;
+			}
 			config.metadata.site_url = `${config.development.host}:${config.development.port}`;
 			
 			// Prepend `http://` if not already present.

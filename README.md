@@ -154,7 +154,7 @@ The development mode is activated when the `-d` or `--development` options is se
     * Default: `undefined`
   * `host`: Address to use during development mode.
     * Type: `String`
-    * Default: `localhost`
+    * Default: Local ipv4 address otherwise falls back to `localhost`
   * `port`: Process to use during development mode.
     * Type: `Number`
     * Default: `8080`
