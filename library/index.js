@@ -40,22 +40,18 @@ const DEFAULT_CONFIG = {
 	},
 	transform: {
 		css: {
-			plugins: [
-				[
-					`postcss-preset-env`, {
-						stage: 2
-					}
-				]
-			]
+			plugins: [[
+				`postcss-preset-env`, {
+					stage: 2
+				}
+			]]
 		},
 		js: {
-			presets: [
-				[
-					`@babel/preset-env`, {
-						targets: `> 1%, not dead`
-					}
-				]
-			]
+			presets: [[
+				`@babel/preset-env`, {
+					targets: `> 1%, not dead`
+				}
+			]]
 		},
 		md: {
 			html: true,
